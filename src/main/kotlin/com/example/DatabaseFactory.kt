@@ -8,8 +8,8 @@ object DatabaseFactory {
 
     fun init() {
         val sqliteDataSource = SQLiteDataSource()
-        //sqliteDataSource.url = "jdbc:sqlite:/home/ubuntu/fdsearch/fdsearch.db"
-        sqliteDataSource.url = "jdbc:sqlite:C:\\sqlite3\\fdsearch.db" //For test Local
+        sqliteDataSource.url = "jdbc:sqlite:/home/ubuntu/fdsearch/fdsearch.db"
+//        sqliteDataSource.url = "jdbc:sqlite:C:\\sqlite3\\fdsearch.db" //For test Local
         dataSource = sqliteDataSource
     }
 

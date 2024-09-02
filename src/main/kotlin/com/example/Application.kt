@@ -6,6 +6,7 @@ import com.example.plugins.*
 import com.example.plugins.email.EmailService
 import com.example.plugins.email.LogEmailJob
 import com.example.plugins.email.setupShceduler
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -39,7 +40,7 @@ fun Application.module() {
         })
     }
     CoroutineScope(Dispatchers.IO).launch{
-        // setupShceduler()
+        setupShceduler()
         configureMonitoring()
 
 //        fetchModuleOriginalData("ko")
@@ -49,8 +50,6 @@ fun Application.module() {
 //        fetchStatOriginalData("ko")
 //        fetchReactorOriginalData("ko")
 //        fetchExternalOriginalData("ko")
-
-
     }
 
 
@@ -94,6 +93,13 @@ fun Application.module() {
             val equippedExternal = fetchFromApp.fetchEquippedExternal(externals)
 
             call.respond(equippedExternal)
+        }
+
+        // routing 제외 DENY
+        route("{...}") {
+            handle {
+                call.respond(HttpStatusCode.Forbidden, "Access denied")
+            }
         }
     }
 }

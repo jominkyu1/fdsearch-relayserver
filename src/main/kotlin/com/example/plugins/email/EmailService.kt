@@ -26,7 +26,7 @@ object EmailService {
             .buildEmail()
 
         val mailer = MailerBuilder
-            .withSMTPServer("smtp.gmail.com", 25, "jominkyu@gmail.com", mailPassword)
+            .withSMTPServer("smtp.gmail.com", 587, "jominkyu@gmail.com", mailPassword)
             .buildMailer()
 
         mailer.sendMail(email)
