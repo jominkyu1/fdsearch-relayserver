@@ -1,8 +1,6 @@
 package com.example
 
 import com.example.data.*
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
 class LocalRepository(private val dataSource: DataSource) {
@@ -344,6 +342,65 @@ class LocalRepository(private val dataSource: DataSource) {
                 stmt.executeBatch()
                 conn.commit()
                 insertLog("ReactorSkillPowerCoefficient Entity")
+            }
+        }
+    }
+
+    fun insertExternalCompMetaData(exlist: List<ExternalComponentOriginalData>){
+        dataSource.connection.use { conn ->
+            conn.autoCommit = false
+
+            conn.prepareStatement("""
+                INSERT OR REPLACE INTO ExternalCompEntity VALUES (?, ?, ?, ?, ?)
+            """.trimIndent()
+            ).use { stmt ->
+                exlist.forEach { ex ->
+                    stmt.setString(1,ex.externalComponentId)
+                    stmt.setString(2,ex.externalComponentName)
+                    stmt.setString(3,ex.imageUrl)
+                    stmt.setString(4,ex.externalComponentEquipmentType)
+                    stmt.setString(5,ex.externalComponentTier)
+                    stmt.addBatch()
+                }
+                stmt.executeBatch()
+                conn.commit()
+                insertLog("ExternalComp Entity")
+            }
+
+            conn.prepareStatement("""
+                INSERT OR REPLACE INTO ExternalCompBaseStatEntity VALUES (?, ?, ?, ?)
+            """.trimIndent()
+            ).use { stmt ->
+                exlist.flatMap { ex ->
+                    ex.baseStat.map { baseStat ->
+                        stmt.setString(1, ex.externalComponentId)
+                        stmt.setInt(2, baseStat.level)
+                        stmt.setString(3, baseStat.statId)
+                        stmt.setDouble(4, baseStat.statValue)
+                        stmt.addBatch()
+                    }
+                }
+                stmt.executeBatch()
+                conn.commit()
+                insertLog("ExternalComp BaseStat Entity")
+            }
+
+            conn.prepareStatement("""
+                INSERT OR REPLACE INTO ExternalCompSetOptionEntity VALUES (?, ?, ?, ?)
+            """.trimIndent()
+            ).use { stmt ->
+                exlist.flatMap { ex ->
+                    ex.setOptionDetail.map { setOption ->
+                        stmt.setString(1, ex.externalComponentId)
+                        stmt.setInt(2, setOption.setCount)
+                        stmt.setString(3, setOption.setOption)
+                        stmt.setString(4, setOption.setOptionEffect)
+                        stmt.addBatch()
+                    }
+                }
+                stmt.executeBatch()
+                conn.commit()
+                insertLog("ExternalComp SetOption Entity")
             }
         }
     }

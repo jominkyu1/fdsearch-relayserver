@@ -193,4 +193,87 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
 
         return equippedReactor
     }
+
+    fun getEquippedExternal(externals: List<ExternalComponent>): List<EquippedExternal> {
+        val equipExternals: MutableList<EquippedExternal> = mutableListOf()
+        val whereCondition = externals.joinToString(","){
+            "('${it.externalComponentId}', ${it.externalComponentLevel})"
+        }
+
+        dataSource.connection.use { conn ->
+            conn.autoCommit = false
+            
+            //장착 외장부품 추가
+            conn.prepareStatement("""
+                SELECT
+                    ex.external_component_id,
+                    ex.external_component_name,
+                    ex.image_url,
+                    ex.external_component_equipment_type,
+                    ex.external_component_tier,
+
+                    stat.stat_name,
+                    exBase.stat_value
+
+                FROM ExternalCompEntity ex
+                INNER JOIN ExternalCompBaseStatEntity exBase ON ex.external_component_id = exBase.external_component_id
+                INNER JOIN StatEntity stat ON exBase.stat_id = stat.stat_id
+                WHERE (ex.external_component_id, exBase.level) IN ($whereCondition)
+            """.trimIndent()
+            ).use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    while(rs.next()){
+                        val ex = EquippedExternal (
+                            externalComponentId = rs.getString(1),
+                            externalComponentName = rs.getString(2),
+                            imageUrl = rs.getString(3),
+                            externalComponentEquipmentType = rs.getString(4),
+                            externalComponentTier = rs.getString(5),
+                            statName = rs.getString(6),
+                            statValue = rs.getDouble(7)
+                        )
+                        equipExternals.add(ex)
+                    }
+                }
+            } // 장착 외장부품 추가
+            
+            // 활성화된 세트 및 세트 설명
+            val whereCondition2 = externals.joinToString(",") {
+                "'${it.externalComponentId}'"
+            }
+            conn.prepareStatement("""
+                SELECT
+                    (count(*)/2) as enabledCount,
+                    A.set_option,
+                    A.set_count,
+                    A.set_option_effect,
+                    B.set_count,
+                    B.set_option_effect
+                FROM ExternalCompSetOptionEntity A
+                INNER JOIN ExternalCompSetOptionEntity B
+                    ON A.external_component_id = B.external_component_id AND B.set_count = 4
+                WHERE A.external_component_id
+                          IN ($whereCondition2)
+                GROUP BY A.set_option
+            """.trimIndent()
+            ).use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    while(rs.next()){
+                        val enabledSet = EnabledSet(
+                            enabledCount = rs.getInt(1),
+                            setOption = rs.getString(2),
+                            setOne = rs.getInt(3),
+                            setOneDesc = rs.getString(4),
+                            setTwo = rs.getInt(5),
+                            setTwoDesc = rs.getString(6)
+                        )
+                        //첫번째값에 설명추가
+                        equipExternals[0].setOptions.add(enabledSet)
+                    }
+                }
+            }
+        }
+        
+        return equipExternals
+    }
 }

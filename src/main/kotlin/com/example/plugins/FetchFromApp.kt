@@ -3,19 +3,13 @@ package com.example.plugins
 import com.example.DatabaseFactory
 import com.example.LocalRepositoryToApp
 import com.example.dto.*
-import io.ktor.server.application.*
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
 import org.slf4j.LoggerFactory
 
 
 class FetchFromApp{
     private val logger = LoggerFactory.getLogger("FetchFromApp")
     private val localRepository = LocalRepositoryToApp(DatabaseFactory.dataSource)
-    private val json = Json {
-        ignoreUnknownKeys = true // 맵핑되는 필드가 없을때 무시
-        coerceInputValues = true // NULL 기본값 처리
-    }
 
     fun fetchCloudBasicInfo(
         descendant_id: String,
@@ -43,5 +37,11 @@ class FetchFromApp{
         enchantLevel: Int
     ): EquippedReactor {
         return localRepository.getEquippedReactor(reactorId, level, enchantLevel)
+    }
+
+    fun fetchEquippedExternal(
+        externals: List<ExternalComponent>
+    ): List<EquippedExternal>{
+        return localRepository.getEquippedExternal(externals)
     }
 }

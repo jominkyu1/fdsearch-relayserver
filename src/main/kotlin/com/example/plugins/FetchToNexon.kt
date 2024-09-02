@@ -71,3 +71,11 @@ suspend fun Application.fetchReactorOriginalData(language_code: String){
 
     localRepository.insertReactorMetaData(decodedList)
 }
+
+suspend fun Application.fetchExternalOriginalData(language_code: String){
+    val response = client.get("$BASE_URL/static/tfd/meta/$language_code/external-component.json").bodyAsText()
+    val decodedList: List<ExternalComponentOriginalData> = json.decodeFromString(response)
+    fetchLog("external.component.json", decodedList.size)
+
+    localRepository.insertExternalCompMetaData(decodedList)
+}

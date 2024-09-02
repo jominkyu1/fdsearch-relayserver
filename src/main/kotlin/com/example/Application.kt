@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.dto.ExternalComponent
 import com.example.dto.Module
 import com.example.plugins.*
 import io.ktor.serialization.kotlinx.json.*
@@ -12,17 +13,12 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
 val logger = LoggerFactory.getLogger("KtorServerLogger")
 private lateinit var fetchFromApp: FetchFromApp
-private val json = Json {
-    ignoreUnknownKeys = true // 맵핑되는 필드가 없을때 무시
-    coerceInputValues = true // NULL 기본값 처리
-}
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
@@ -46,6 +42,7 @@ fun Application.module() {
         fetchWeaponOriginalData("ko")
         fetchStatOriginalData("ko")
         fetchReactorOriginalData("ko")
+        fetchExternalOriginalData("ko")
     }
 
     configureMonitoring()
@@ -86,6 +83,13 @@ fun Application.module() {
             val equippedReactor = fetchFromApp.fetchEquippedReactor(reactorId, level, enchantLevel)
 
             call.respond(equippedReactor)
+        }
+
+        post("/equipped_external"){
+            val externals = call.receive<List<ExternalComponent>>()
+            val equippedExternal = fetchFromApp.fetchEquippedExternal(externals)
+
+            call.respond(equippedExternal)
         }
     }
 }

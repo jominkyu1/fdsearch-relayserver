@@ -8,8 +8,8 @@ object DatabaseFactory {
 
     fun init() {
         val sqliteDataSource = SQLiteDataSource()
-        sqliteDataSource.url = "jdbc:sqlite:/home/ubuntu/fdsearch/fdsearch.db"
-        //sqliteDataSource.url = "jdbc:sqlite:C:\\sqlite3\\fdsearch.db" //For test Local
+        //sqliteDataSource.url = "jdbc:sqlite:/home/ubuntu/fdsearch/fdsearch.db"
+        sqliteDataSource.url = "jdbc:sqlite:C:\\sqlite3\\fdsearch.db" //For test Local
         dataSource = sqliteDataSource
     }
 
@@ -183,6 +183,41 @@ object DatabaseFactory {
                     coefficient_stat_value REAL,
 
                     PRIMARY KEY (reactor_id, level, coefficient_stat_id)
+                )
+                """.trimIndent())
+
+                //외장부품
+                stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS ExternalCompEntity (
+                    external_component_id TEXT,
+                    external_component_name TEXT,
+                    image_url TEXT,
+
+                    external_component_equipment_type TEXT,
+                    external_component_tier TEXT,
+
+                    PRIMARY KEY (external_component_id)
+                )
+                """.trimIndent())
+
+                stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS ExternalCompBaseStatEntity(
+                    external_component_id TEXT,
+                    level INT,
+                    stat_id TEXT,
+                    stat_value REAL,
+
+                    PRIMARY KEY (external_component_id, level)
+                )
+                """.trimIndent())
+
+                stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS ExternalCompSetOptionEntity(
+                    external_component_id TEXT,
+                    set_count INT,
+
+                    set_option TEXT,
+                    set_option_effect TEXT
                 )
                 """.trimIndent())
             }

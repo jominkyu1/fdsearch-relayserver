@@ -1,0 +1,15 @@
+
+### 착용중인 외장부품 조회
+POST http://127.0.0.1:8080/equipped_external
+Content-Type: application/json
+
+  [
+    {
+      "externalComponentId" : "241013001",
+      "externalComponentLevel" : "100"
+    },
+    {
+      "externalComponentId" : "242013001",
+      "externalComponentLevel" : "100"
+    }
+  ]
