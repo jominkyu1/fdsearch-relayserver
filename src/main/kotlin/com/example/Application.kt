@@ -3,6 +3,9 @@ package com.example
 import com.example.dto.ExternalComponent
 import com.example.dto.Module
 import com.example.plugins.*
+import com.example.plugins.email.EmailService
+import com.example.plugins.email.LogEmailJob
+import com.example.plugins.email.setupShceduler
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -36,22 +39,23 @@ fun Application.module() {
         })
     }
     CoroutineScope(Dispatchers.IO).launch{
-        fetchModuleOriginalData("ko")
-        fetchDescendantOriginalData("ko")
-        fetchTitleOriginalData("ko")
-        fetchWeaponOriginalData("ko")
-        fetchStatOriginalData("ko")
-        fetchReactorOriginalData("ko")
-        fetchExternalOriginalData("ko")
+        // setupShceduler()
+        configureMonitoring()
+
+//        fetchModuleOriginalData("ko")
+//        fetchDescendantOriginalData("ko")
+//        fetchTitleOriginalData("ko")
+//        fetchWeaponOriginalData("ko")
+//        fetchStatOriginalData("ko")
+//        fetchReactorOriginalData("ko")
+//        fetchExternalOriginalData("ko")
+
+
     }
 
-    configureMonitoring()
+
 
     routing {
-        get("/hi"){
-            call.respond("yes Hi")
-        }
-
         get("/basic_info") {
             val titlePrefixId = call.request.queryParameters["title_prefix_id"]!!
             val titleSuffixId = call.request.queryParameters["title_suffix_id"]!!

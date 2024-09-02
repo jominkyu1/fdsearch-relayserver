@@ -13,3 +13,7 @@ Content-Type: application/json
       "externalComponentLevel" : "100"
     }
   ]
+
+### 쿼리파라미터 출력 테스트
+GET http://127.0.0.1:8080/equipped_error?param1=HELLO&param2=WORLD
+Content-Type: application/json

@@ -1,13 +1,25 @@
 <configuration>
+  <!-- 콘솔 로그 설정 -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
-  <root level="trace">
-    <appender-ref ref="STDOUT"/>
+
+  <!-- 파일 로그 설정 -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <FileNamePattern>./logs/fdsearchlog-%d{yyyyMMdd}.log</FileNamePattern>
+      <MaxHistory>7</MaxHistory> <!-- 기록 일주일 -->
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- 루트 로거 설정 -->
+  <root level="INFO"> <!-- 로그 레벨 설정 -->
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILE" />
   </root>
-  <logger name="org.eclipse.jetty" level="INFO"/>
-  <logger name="io.netty" level="INFO"/>
-  <logger name="org.sqlite" level="INFO" />
 </configuration>

@@ -21,6 +21,9 @@ dependencies {
     //http client engine
     implementation("io.ktor:ktor-client-cio-jvm")
     implementation "io.ktor:ktor-client-core-jvm"
+    //sending mail
+    implementation("org.simplejavamail:simple-java-mail:8.11.1")
+    implementation("org.quartz-scheduler:quartz:2.3.2")
 
     implementation "io.ktor:ktor-server-core-jvm"
     implementation "io.ktor:ktor-server-content-negotiation-jvm"
