@@ -3,6 +3,7 @@ package com.example
 import org.sqlite.SQLiteDataSource
 import javax.sql.DataSource
 
+@Suppress("unused")
 enum class MODE{
     LOCAL, CLOUD
 }
@@ -13,8 +14,10 @@ object DatabaseFactory {
         val sqliteDataSource = SQLiteDataSource()
         if(mode == MODE.CLOUD){
             sqliteDataSource.url = "jdbc:sqlite:/home/ubuntu/fdsearch/fdsearch.db"
+            logger.info("## CLOUD MODE STARTED ##")
         } else {
             sqliteDataSource.url = "jdbc:sqlite:C:\\sqlite3\\fdsearch.db"
+            logger.info("## LOCAL MODE STARTED ##")
         }
 
         dataSource = sqliteDataSource
@@ -234,7 +237,9 @@ object DatabaseFactory {
                     set_count INT,
 
                     set_option TEXT,
-                    set_option_effect TEXT
+                    set_option_effect TEXT,
+                    
+                    PRIMARY KEY(external_component_id, set_count)
                 )
                 """.trimIndent())
             }

@@ -2,8 +2,10 @@ package com.example
 
 import com.example.dto.ExternalComponent
 import com.example.dto.Module
-import com.example.plugins.*
-import com.example.plugins.email.*
+import com.example.plugins.FetchFromApp
+import com.example.plugins.configureMonitoring
+import com.example.plugins.email.MethodCounterDto
+import com.example.plugins.email.setupShceduler
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -13,9 +15,6 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
@@ -38,7 +37,6 @@ fun Application.module() {
             coerceInputValues = true // NULL -> 기본값
         })
     }
-
     setupShceduler()
     configureMonitoring()
 

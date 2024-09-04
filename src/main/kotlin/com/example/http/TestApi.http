@@ -5,11 +5,19 @@ Content-Type: application/json
 
   [
     {
-      "externalComponentId" : "241013001",
+      "externalComponentId" : "241043004",
       "externalComponentLevel" : "100"
     },
     {
-      "externalComponentId" : "242013001",
+      "externalComponentId" : "242001008",
+      "externalComponentLevel" : "100"
+    },
+    {
+      "externalComponentId" : "243023002",
+      "externalComponentLevel" : "100"
+    },
+    {
+      "externalComponentId" : "244043004",
       "externalComponentLevel" : "100"
     }
   ]
