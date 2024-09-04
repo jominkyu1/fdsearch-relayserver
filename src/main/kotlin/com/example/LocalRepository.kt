@@ -1,12 +1,69 @@
 package com.example
 
 import com.example.data.*
+import com.example.plugins.email.EndpointEnum
+import com.example.plugins.email.MethodCounterDto
 import javax.sql.DataSource
 
 class LocalRepository(private val dataSource: DataSource) {
     private fun insertLog(name: String, size: Int = 0) {
         logger.info("Inserted $name to Local Server")
     }
+    fun delteQueryCount() {
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("""
+                DELETE FROM RequestCount
+            """.trimIndent()
+            ).use{ stmt -> stmt.execute() }
+        }
+    }
+
+    fun getQueryCount(): Map<String, Int>{
+        val counts = mutableMapOf<String, Int>()
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("""
+                SELECT method, count FROM RequestCount                
+            """.trimIndent()
+            ).use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    while(rs.next()){
+                        val method = rs.getString("method")
+                        val count = rs.getInt("count")
+                        counts[method] = count
+                    }
+                }
+            }
+        }
+
+        return counts
+    }
+
+    fun updateQueryCount(){
+        dataSource.connection.use { conn ->
+            val updateStmt = conn.prepareStatement("""
+                UPDATE RequestCount SET count = count + ? WHERE method = ?
+            """.trimIndent())
+
+            val insertStmt = conn.prepareStatement("""
+                INSERT INTO RequestCount VALUES (?, ?)
+            """.trimIndent()) //순서 method, count
+
+            EndpointEnum.entries.forEach { endpoint ->
+                updateStmt.setInt(1, endpoint.field.get())
+                updateStmt.setString(2, endpoint.value)
+                val updatedRows = updateStmt.executeUpdate()
+                //업데이트 실패시 (Method ROW가 없을시) INSERT
+                if(updatedRows == 0 ){
+                    insertStmt.setString(1, endpoint.value)
+                    insertStmt.setInt(2, endpoint.field.get())
+                    insertStmt.execute()
+                }
+            }
+            updateStmt.close()
+            insertStmt.close()
+        }
+    }
+
     fun insertModuleMetaData(modules: List<ModuleOriginalData>){
         dataSource.connection.use { conn ->
             conn.autoCommit = false

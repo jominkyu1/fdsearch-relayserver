@@ -24,7 +24,7 @@ private fun fetchLog(name: String, size: Int){
     logger.info("Fetched $name from Server [SIZE] : $size")
 }
 
-suspend fun Application.fetchDescendantOriginalData(language_code: String){
+suspend fun fetchDescendantOriginalData(language_code: String){
     val response = client.get("$BASE_URL/static/tfd/meta/$language_code/descendant.json").bodyAsText()
     val decodedList: List<DescendantOriginalData> = json.decodeFromString(response)
     fetchLog("descendant.json", decodedList.size)
@@ -32,7 +32,7 @@ suspend fun Application.fetchDescendantOriginalData(language_code: String){
     localRepository.insertDescendantsMetadata(decodedList)
 }
 
-suspend fun Application.fetchTitleOriginalData(language_code: String){
+suspend fun fetchTitleOriginalData(language_code: String){
     val response = client.get("$BASE_URL/static/tfd/meta/$language_code/title.json").bodyAsText()
     val decodedList: List<TitleOriginalData> = json.decodeFromString(response)
     fetchLog("title.json", decodedList.size)
@@ -40,7 +40,7 @@ suspend fun Application.fetchTitleOriginalData(language_code: String){
     localRepository.insertTitleMetadata(decodedList)
 }
 
-suspend fun Application.fetchWeaponOriginalData(language_code: String){
+suspend fun fetchWeaponOriginalData(language_code: String){
     val response = client.get("$BASE_URL/static/tfd/meta/$language_code/weapon.json").bodyAsText()
     val decodedList: List<WeaponOriginalData> = json.decodeFromString(response)
     fetchLog("weapon.json", decodedList.size)
@@ -48,7 +48,7 @@ suspend fun Application.fetchWeaponOriginalData(language_code: String){
     localRepository.insertWeaponMetadata(decodedList)
 }
 
-suspend fun Application.fetchStatOriginalData(language_code: String){
+suspend fun fetchStatOriginalData(language_code: String){
     val response = client.get("$BASE_URL/static/tfd/meta/$language_code/stat.json").bodyAsText()
     val decodedList: List<StatOriginalData> = json.decodeFromString(response)
     fetchLog("stat.json", decodedList.size)
@@ -56,7 +56,7 @@ suspend fun Application.fetchStatOriginalData(language_code: String){
     localRepository.insertStatMetaData(decodedList)
 }
 
-suspend fun Application.fetchModuleOriginalData(language_code: String){
+suspend fun fetchModuleOriginalData(language_code: String){
     val response = client.get("$BASE_URL/static/tfd/meta/$language_code/module.json").bodyAsText()
     val decodedList: List<ModuleOriginalData> = json.decodeFromString(response)
     fetchLog("module.json", decodedList.size)
@@ -64,7 +64,7 @@ suspend fun Application.fetchModuleOriginalData(language_code: String){
     localRepository.insertModuleMetaData(decodedList)
 }
 
-suspend fun Application.fetchReactorOriginalData(language_code: String){
+suspend fun fetchReactorOriginalData(language_code: String){
     val response = client.get("$BASE_URL/static/tfd/meta/$language_code/reactor.json").bodyAsText()
     val decodedList: List<ReactorOriginalData> = json.decodeFromString(response)
     fetchLog("reactor.json", decodedList.size)
@@ -72,7 +72,7 @@ suspend fun Application.fetchReactorOriginalData(language_code: String){
     localRepository.insertReactorMetaData(decodedList)
 }
 
-suspend fun Application.fetchExternalOriginalData(language_code: String){
+suspend fun fetchExternalOriginalData(language_code: String){
     val response = client.get("$BASE_URL/static/tfd/meta/$language_code/external-component.json").bodyAsText()
     val decodedList: List<ExternalComponentOriginalData> = json.decodeFromString(response)
     fetchLog("external.component.json", decodedList.size)

@@ -3,9 +3,7 @@ package com.example
 import com.example.dto.ExternalComponent
 import com.example.dto.Module
 import com.example.plugins.*
-import com.example.plugins.email.EmailService
-import com.example.plugins.email.LogEmailJob
-import com.example.plugins.email.setupShceduler
+import com.example.plugins.email.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -30,7 +28,8 @@ fun main() {
 }
 
 fun Application.module() {
-    DatabaseFactory.init() // DB Init
+    DatabaseFactory.init(MODE.CLOUD) // DB Init
+
     DatabaseFactory.createTable() // Create Tables
     fetchFromApp = FetchFromApp()
     install(ContentNegotiation) {
@@ -39,20 +38,9 @@ fun Application.module() {
             coerceInputValues = true // NULL -> 기본값
         })
     }
-    CoroutineScope(Dispatchers.IO).launch{
-        setupShceduler()
-        configureMonitoring()
 
-//        fetchModuleOriginalData("ko")
-//        fetchDescendantOriginalData("ko")
-//        fetchTitleOriginalData("ko")
-//        fetchWeaponOriginalData("ko")
-//        fetchStatOriginalData("ko")
-//        fetchReactorOriginalData("ko")
-//        fetchExternalOriginalData("ko")
-    }
-
-
+    setupShceduler()
+    configureMonitoring()
 
     routing {
         get("/basic_info") {
@@ -61,6 +49,7 @@ fun Application.module() {
             val descendantId = call.request.queryParameters["descendant_id"]!!
 
             val basicInfo = fetchFromApp.fetchCloudBasicInfo(descendantId, titlePrefixId, titleSuffixId)
+            MethodCounterDto.basicInfo += 1
             call.respond(basicInfo)
         }
 
@@ -68,6 +57,8 @@ fun Application.module() {
             val modules = call.receive<List<Module>>()
 
             val equippedModules = fetchFromApp.fetchEquippedModule(modules)
+
+            MethodCounterDto.eqModule += 1
             call.respond(equippedModules)
         }
 
@@ -75,6 +66,8 @@ fun Application.module() {
             val weaponId = call.request.queryParameters["weapon_id"]!!
 
             val weaponEntity = fetchFromApp.fetchWeaponEntity(weaponId)
+
+            MethodCounterDto.weaponEntity += 1
             call.respond(weaponEntity)
         }
 
@@ -85,6 +78,7 @@ fun Application.module() {
 
             val equippedReactor = fetchFromApp.fetchEquippedReactor(reactorId, level, enchantLevel)
 
+            MethodCounterDto.eqReactor += 1
             call.respond(equippedReactor)
         }
 
@@ -92,12 +86,14 @@ fun Application.module() {
             val externals = call.receive<List<ExternalComponent>>()
             val equippedExternal = fetchFromApp.fetchEquippedExternal(externals)
 
+            MethodCounterDto.eqExternal += 1
             call.respond(equippedExternal)
         }
 
         // routing 제외 DENY
         route("{...}") {
             handle {
+                MethodCounterDto.denied += 1
                 call.respond(HttpStatusCode.Forbidden, "Access denied")
             }
         }

@@ -3,13 +3,20 @@ package com.example
 import org.sqlite.SQLiteDataSource
 import javax.sql.DataSource
 
+enum class MODE{
+    LOCAL, CLOUD
+}
 object DatabaseFactory {
     lateinit var dataSource: DataSource
 
-    fun init() {
+    fun init(mode: MODE) {
         val sqliteDataSource = SQLiteDataSource()
-        sqliteDataSource.url = "jdbc:sqlite:/home/ubuntu/fdsearch/fdsearch.db"
-//        sqliteDataSource.url = "jdbc:sqlite:C:\\sqlite3\\fdsearch.db" //For test Local
+        if(mode == MODE.CLOUD){
+            sqliteDataSource.url = "jdbc:sqlite:/home/ubuntu/fdsearch/fdsearch.db"
+        } else {
+            sqliteDataSource.url = "jdbc:sqlite:C:\\sqlite3\\fdsearch.db"
+        }
+
         dataSource = sqliteDataSource
     }
 
@@ -17,6 +24,16 @@ object DatabaseFactory {
         dataSource.connection.use { conn ->
             conn.createStatement().use { stmt ->
                 // Create tables
+
+                // 엔드포인트 조회 카운트
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS RequestCount(
+                        method TEXT,
+                        count INTEGER,
+                        
+                        PRIMARY KEY (method)
+                    )
+                """.trimIndent())
 
                 // 칭호
                 stmt.executeUpdate("""

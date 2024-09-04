@@ -1,5 +1,8 @@
 package com.example.plugins.email
 
+import com.example.FetchMetadataJob
+import io.ktor.server.application.*
+import org.quartz.CronExpression
 import org.quartz.CronScheduleBuilder
 import org.quartz.JobBuilder
 import org.quartz.JobDetail
@@ -16,17 +19,41 @@ fun setupShceduler(){
     val job: JobDetail = JobBuilder.newJob(LogEmailJob::class.java)
         .withIdentity("logEmailJob")
         .build()
-
-    //매일 00:10
-    val trigger: Trigger = TriggerBuilder.newTrigger()
-        .withIdentity("logEmailTrigger")
-        .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(0, 10))
+    val requestCountJob: JobDetail = JobBuilder.newJob(LogRequestCount::class.java)
+        .withIdentity("LogRequestCountHourlyJob")
+        .build()
+    val fetchMetadataJob: JobDetail = JobBuilder.newJob(FetchMetadataJob::class.java)
+        .withIdentity("LogFetchMetadataJob")
         .build()
 
+    //매일 00:05
+    val trigger: Trigger = TriggerBuilder.newTrigger()
+        .withIdentity("logEmailTrigger")
+        .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(0, 5))
+        .build()
+
+    //매일 1시간 단위
+    val hourlyTrigger: Trigger = TriggerBuilder.newTrigger()
+        .withIdentity(("logRequestCountHourlyTrigger"))
+        .withSchedule(SimpleScheduleBuilder.repeatHourlyForever())
+        .build()
+    
+    //일주일 단위 (매주 월요일 00:30)
+    val weeklyTrigger: Trigger = TriggerBuilder.newTrigger()
+        .withIdentity("logWeeklyTrigger")
+        .withSchedule(CronScheduleBuilder.cronSchedule("0 30 0 ? * 1 *"))
+        .build()
+    //1분 단위 [테스트용]
+    val minuteTrigger: Trigger = TriggerBuilder.newTrigger()
+        .withIdentity(("repeatMinuteForeverTrigger"))
+        .withSchedule(SimpleScheduleBuilder.repeatMinutelyForever())
+        .build()
     try{
         StdSchedulerFactory.getDefaultScheduler().apply{
             start()
             scheduleJob(job, trigger)
+            scheduleJob(requestCountJob, hourlyTrigger)
+            scheduleJob(fetchMetadataJob, weeklyTrigger)
             logger.info("## Scheduler Service Started")
         }
     }catch(e: SchedulerException){

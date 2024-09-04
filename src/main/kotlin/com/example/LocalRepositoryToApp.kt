@@ -202,9 +202,10 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
 
         dataSource.connection.use { conn ->
             conn.autoCommit = false
-            
+
             //장착 외장부품 추가
-            conn.prepareStatement("""
+            conn.prepareStatement(
+                """
                 SELECT
                     ex.external_component_id,
                     ex.external_component_name,
@@ -222,8 +223,8 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
             """.trimIndent()
             ).use { stmt ->
                 stmt.executeQuery().use { rs ->
-                    while(rs.next()){
-                        val ex = EquippedExternal (
+                    while (rs.next()) {
+                        val ex = EquippedExternal(
                             externalComponentId = rs.getString(1),
                             externalComponentName = rs.getString(2),
                             imageUrl = rs.getString(3),
@@ -236,12 +237,13 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                     }
                 }
             } // 장착 외장부품 추가
-            
+
             // 활성화된 세트 및 세트 설명
             val whereCondition2 = externals.joinToString(",") {
                 "'${it.externalComponentId}'"
             }
-            conn.prepareStatement("""
+            conn.prepareStatement(
+                """
                 SELECT
                     (count(*)/2) as enabledCount,
                     A.set_option,
@@ -258,7 +260,7 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
             """.trimIndent()
             ).use { stmt ->
                 stmt.executeQuery().use { rs ->
-                    while(rs.next()){
+                    while (rs.next()) {
                         val enabledSet = EnabledSet(
                             enabledCount = rs.getInt(1),
                             setOption = rs.getString(2),
