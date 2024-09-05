@@ -26,9 +26,10 @@ class FetchFromApp{
     }
 
     fun fetchWeaponEntity(
-        weaponId: String
+        weaponId: String,
+        weaponLevel: Int
     ): WeaponEntity {
-        return localRepository.getWeaponEntity(weaponId)
+        return localRepository.getWeaponEntity(weaponId, weaponLevel)
     }
 
     fun fetchEquippedReactor(

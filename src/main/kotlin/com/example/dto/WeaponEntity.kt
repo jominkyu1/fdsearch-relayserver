@@ -12,5 +12,6 @@ data class WeaponEntity (
     val weaponPerkAbilityName: String? = "NOT FOUND",
     val weaponRoundsType: String = "NOT FOUND",
     val weaponTier: String = "NOT FOUND",
-    val weaponType: String = "NOT FOUND"
+    val weaponType: String = "NOT FOUND",
+    val firearmAtkValue: Int = -1
 )

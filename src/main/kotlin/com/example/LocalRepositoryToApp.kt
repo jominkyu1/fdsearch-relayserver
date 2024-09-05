@@ -82,18 +82,20 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         return equippedModule
     }
 
-    fun getWeaponEntity(weaponId: String): WeaponEntity{
+    fun getWeaponEntity(weaponId: String, weaponLevel: Int): WeaponEntity{
         dataSource.connection.use { conn ->
             conn.prepareStatement(
                 """
                     SELECT 
-                    weapon_id, image_Url, weapon_Name, weapon_PerkAbilityDescription, weapon_PerkAbilityImageUrl, 
-                    weapon_PerkAbilityName, weapon_RoundsType, weapon_Tier, weapon_Type 
-                    FROM WeaponEntity 
-                    WHERE weapon_id = ?
+                    entity.weapon_id, image_Url, weapon_Name, weapon_PerkAbilityDescription, weapon_PerkAbilityImageUrl, 
+                    weapon_PerkAbilityName, weapon_RoundsType, weapon_Tier, weapon_Type, firearm.firearmAtkValue
+                    FROM WeaponEntity entity 
+                    INNER JOIN WeaponFirearmEntity firearm ON entity.weapon_Id = firearm.weapon_Id
+                    WHERE entity.weapon_id = ? and firearm.level = ? and firearm.firearmAtkType = '105000026'
                 """.trimIndent()
             ).use { stmt ->
                 stmt.setString(1, weaponId)
+                stmt.setInt(2, weaponLevel)
                 stmt.executeQuery().use { rs ->
                     if(rs.next()){
                         return WeaponEntity (
@@ -105,7 +107,8 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                             weaponPerkAbilityName = rs.getString("weapon_PerkAbilityName") ?: "",
                             weaponRoundsType = rs.getString("weapon_RoundsType"),
                             weaponTier = rs.getString("weapon_Tier"),
-                            weaponType = rs.getString("weapon_Type")
+                            weaponType = rs.getString("weapon_Type"),
+                            firearmAtkValue = rs.getInt("firearmAtkValue")
                         )
                     }
                 }

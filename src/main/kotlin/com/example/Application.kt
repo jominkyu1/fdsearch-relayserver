@@ -62,8 +62,9 @@ fun Application.module() {
 
         get("/weapon_entity"){
             val weaponId = call.request.queryParameters["weapon_id"]!!
+            val weaponLevel = call.request.queryParameters["weapon_level"]!!.toInt()
 
-            val weaponEntity = fetchFromApp.fetchWeaponEntity(weaponId)
+            val weaponEntity = fetchFromApp.fetchWeaponEntity(weaponId, weaponLevel)
 
             MethodCounterDto.weaponEntity += 1
             call.respond(weaponEntity)
