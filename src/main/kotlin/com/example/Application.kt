@@ -2,6 +2,7 @@ package com.example
 
 import com.example.dto.ExternalComponent
 import com.example.dto.Module
+import com.example.dto.RankList
 import com.example.plugins.FetchFromApp
 import com.example.plugins.configureMonitoring
 import com.example.plugins.email.MethodCounterDto
@@ -15,11 +16,14 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.MissingFieldException
+import kotlinx.serialization.internal.throwMissingFieldException
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
 val logger = LoggerFactory.getLogger("KtorServerLogger")
 private lateinit var fetchFromApp: FetchFromApp
+private lateinit var localRepository: LocalRepository
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
@@ -31,6 +35,7 @@ fun Application.module() {
 
     DatabaseFactory.createTable() // Create Tables
     fetchFromApp = FetchFromApp()
+    localRepository = LocalRepository(DatabaseFactory.dataSource)
     install(ContentNegotiation) {
         json(Json {
             ignoreUnknownKeys = true
@@ -87,6 +92,30 @@ fun Application.module() {
 
             MethodCounterDto.eqExternal += 1
             call.respond(equippedExternal)
+        }
+
+        get("/rank_list"){
+            val ranklist = fetchFromApp.fetchRanklist()
+            call.respond(ranklist)
+        }
+
+        post("/update_usercount"){
+            val deviceId = call.request.header("device-id") ?: return@post call.respond(HttpStatusCode.Unauthorized)
+            val updateKey = call.request.header("update-key") ?: return@post call.respond(HttpStatusCode.Unauthorized)
+            if(updateKey != "FDSearchUPDATE") return@post call.respond(HttpStatusCode.NotAcceptable)
+
+            val received = call.receive<RankList>()
+            val username = received.username
+            val rank = received.rank
+            val rankExp = received.rankExp
+
+            //1일 1조회 검증
+            val hasRow = localRepository.hasDeviceIdRow(deviceId, username)
+            if(hasRow) return@post call.respond(HttpStatusCode.OK)
+            else localRepository.insertDeviceId(deviceId, username)
+
+            localRepository.updateUserCount(username, rank, rankExp)
+            call.respond(HttpStatusCode.OK, "OK")
         }
 
         // routing 제외 DENY

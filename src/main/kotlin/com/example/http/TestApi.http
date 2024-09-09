@@ -1,3 +1,17 @@
+### 착용중인 무기 조회
+GET http://127.0.0.1:8080/weapon_entity?weapon_id=211043002&weapon_level=100
+
+### 유저 조회수 업데이트
+POST http://127.0.0.1:8080/update_usercount
+Content-Type: application/json
+update-key: FDSearchUPDATE
+
+{
+  "username" :  "TEST"
+}
+
+### 랭킹 조회
+GET http://127.0.0.1:8080/rank_list
 
 ### 착용중인 외장부품 조회
 POST http://127.0.0.1:8080/equipped_external

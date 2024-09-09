@@ -4,6 +4,30 @@ import com.example.dto.*
 import javax.sql.DataSource
 
 class LocalRepositoryToApp(private val dataSource: DataSource) {
+
+    fun getRankList(): List<RankList>{
+        val ranklist: MutableList<RankList> = mutableListOf()
+
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("""
+                SELECT username, rank, rankExp, count FROM CountRanking ORDER BY count DESC LIMIT 10
+            """.trimIndent()
+            ).use { stmt ->
+                val rs = stmt.executeQuery()
+                while(rs.next()){
+                    val rankitem = RankList(
+                        username = rs.getString(1),
+                        rank = rs.getInt(2),
+                        rankExp = rs.getInt(3),
+                        count = rs.getInt(4)
+                    )
+                    ranklist.add(rankitem)
+                }
+            }
+        }
+        return ranklist
+    }
+
     fun getCloudBasicInfo(
         descendant_id: String = "NOTHING",
         title_prefix_id: String = "NOTHING",

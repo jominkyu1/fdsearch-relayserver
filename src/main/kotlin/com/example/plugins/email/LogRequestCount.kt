@@ -16,7 +16,7 @@ class LogRequestCount : Job {
     override fun execute(p0: JobExecutionContext?) {
         localRepository.updateQueryCount()
         clearCount()
-        logger.info("RequestCount 테이블 업데이트 성공")
+        logger.info("RequestCount 테이블 업데이트 성공 [Every 2hour]")
     }
 
     private fun clearCount(){

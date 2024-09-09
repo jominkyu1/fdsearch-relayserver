@@ -3,12 +3,74 @@ package com.example
 import com.example.data.*
 import com.example.plugins.email.EndpointEnum
 import com.example.plugins.email.MethodCounterDto
+import java.time.LocalDate
 import javax.sql.DataSource
 
 class LocalRepository(private val dataSource: DataSource) {
     private fun insertLog(name: String, size: Int = 0) {
         logger.info("Inserted $name to Local Server")
     }
+    fun clearCountTime(){
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("""
+                DELETE FROM LastCountTime
+            """.trimIndent()).executeUpdate()
+        }
+    }
+
+    fun insertDeviceId(deviceId: String, username: String){
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("""
+                INSERT INTO LastCountTime VALUES (?, ?, ?)
+            """.trimIndent()
+            ).use { stmt ->
+                stmt.setString(1, deviceId)
+                stmt.setString(2, username)
+                stmt.setString(3, LocalDate.now().toString())
+                stmt.executeUpdate()
+            }
+        }
+    }
+
+    fun hasDeviceIdRow(deviceId: String, username: String): Boolean{
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("""
+                SELECT device_id FROM LastCountTime WHERE device_id = ? and username = ?
+            """.trimIndent()
+            ).use { stmt ->
+                stmt.setString(1, deviceId)
+                stmt.setString(2, username)
+                return stmt.executeQuery().next()
+            }
+        }
+    }
+
+    fun updateUserCount(username: String, rank: Int = 0, rankExp: Int){
+        dataSource.connection.use { conn ->
+            val updateStmt = conn.prepareStatement("""
+                UPDATE CountRanking SET count = count + 1 WHERE username = ?
+            """.trimIndent())
+
+            //username, rank, count
+            val insertStmt = conn.prepareStatement("""
+                INSERT INTO CountRanking VALUES (?, ?, ?, 1)
+            """.trimIndent())
+
+            updateStmt.setString(1, username)
+            val updatedRows = updateStmt.executeUpdate()
+
+            if(updatedRows == 0) {
+                insertStmt.setString(1, username)
+                insertStmt.setInt(2, rank)
+                insertStmt.setInt(3, rankExp)
+                insertStmt.executeUpdate()
+            }
+
+            updateStmt.close()
+            insertStmt.close()
+        }
+    }
+
     fun delteQueryCount() {
         dataSource.connection.use { conn ->
             conn.prepareStatement("""

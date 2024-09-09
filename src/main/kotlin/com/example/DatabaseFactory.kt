@@ -28,6 +28,29 @@ object DatabaseFactory {
             conn.createStatement().use { stmt ->
                 // Create tables
 
+                // 조회 하루 한번
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS LastCountTime(
+                        device_id TEXT,
+                        username TEXT,
+                        time DATE,
+                        
+                        PRIMARY KEY (device_id, username)
+                    )
+                """.trimIndent())
+
+                // 조회수 랭킹 테이블
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS CountRanking(
+                        username TEXT,
+                        rank INTEGER,
+                        rankExp INTEGER,
+                        count INTEGER,
+
+                        PRIMARY KEY (username)
+                    )
+                """.trimIndent())
+
                 // 엔드포인트 조회 카운트
                 stmt.executeUpdate("""
                     CREATE TABLE IF NOT EXISTS RequestCount(

@@ -25,10 +25,18 @@ fun setupShceduler(){
     val fetchMetadataJob: JobDetail = JobBuilder.newJob(FetchMetadataJob::class.java)
         .withIdentity("LogFetchMetadataJob")
         .build()
+    val clearCountTimeJob: JobDetail = JobBuilder.newJob(ClearCountTimeJob::class.java)
+        .withIdentity("ClearCountTimeJob")
+        .build()
 
     //매일 00:05
     val trigger: Trigger = TriggerBuilder.newTrigger()
         .withIdentity("logEmailTrigger")
+        .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(0, 5))
+        .build()
+    //매일 00:00
+    val dailyTrigger: Trigger = TriggerBuilder.newTrigger()
+        .withIdentity("ClearCountTimeJobTrigger")
         .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(0, 5))
         .build()
 
@@ -51,9 +59,10 @@ fun setupShceduler(){
     try{
         StdSchedulerFactory.getDefaultScheduler().apply{
             start()
-            scheduleJob(job, trigger)
-            scheduleJob(requestCountJob, hourlyTrigger)
-            scheduleJob(fetchMetadataJob, weeklyTrigger)
+            scheduleJob(job, trigger) // Send email
+            scheduleJob(requestCountJob, hourlyTrigger) // endpoint count
+            scheduleJob(fetchMetadataJob, weeklyTrigger) // fetch metadata
+            scheduleJob(clearCountTimeJob, dailyTrigger) // post user count
             logger.info("## Scheduler Service Started")
         }
     }catch(e: SchedulerException){

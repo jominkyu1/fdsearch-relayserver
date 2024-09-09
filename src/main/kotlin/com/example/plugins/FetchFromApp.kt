@@ -11,6 +11,11 @@ class FetchFromApp{
     private val logger = LoggerFactory.getLogger("FetchFromApp")
     private val localRepository = LocalRepositoryToApp(DatabaseFactory.dataSource)
 
+    fun fetchRanklist()
+    : List<RankList>{
+        return localRepository.getRankList()
+    }
+
     fun fetchCloudBasicInfo(
         descendant_id: String,
         title_prefix_id: String,
