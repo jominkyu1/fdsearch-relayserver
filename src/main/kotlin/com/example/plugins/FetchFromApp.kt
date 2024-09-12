@@ -50,4 +50,8 @@ class FetchFromApp{
     ): List<EquippedExternal>{
         return localRepository.getEquippedExternal(externals)
     }
+
+    fun fetchNotice(): Notice {
+        return localRepository.getNotice()
+    }
 }

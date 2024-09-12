@@ -5,12 +5,32 @@ import javax.sql.DataSource
 
 class LocalRepositoryToApp(private val dataSource: DataSource) {
 
+    fun getNotice(): Notice{
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("""
+                SELECT value, date FROM AppInformation WHERE key = 'notice' ORDER BY date DESC LIMIT 1
+            """.trimIndent()
+            ).use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    if(rs.next()){
+                        return Notice(
+                            value = rs.getString(1),
+                            date = rs.getString(2)
+                        )
+                    }else {
+                        return Notice()
+                    }
+                }
+            }
+        }
+    }
+
     fun getRankList(): List<RankList>{
         val ranklist: MutableList<RankList> = mutableListOf()
 
         dataSource.connection.use { conn ->
             conn.prepareStatement("""
-                SELECT username, rank, rankExp, count FROM CountRanking ORDER BY count DESC LIMIT 10
+                SELECT username, rank, rankExp, count FROM CountRanking ORDER BY count DESC LIMIT 50
             """.trimIndent()
             ).use { stmt ->
                 val rs = stmt.executeQuery()
@@ -148,8 +168,6 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         enchantLevel: Int
     ): EquippedReactor{
         var equippedReactor = EquippedReactor()
-        val fixedWhere =
-            if (enchantLevel == 0) "" else "and EE.enchant_level = ?"
 
         dataSource.connection.use { conn ->
             conn.prepareStatement("""
@@ -168,13 +186,13 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                     R.image_url
                 FROM ReactorEntity R 
                 INNER JOIN ReactorSkillPowerEntity SP on R.reactor_id = SP.reactor_id 
-                INNER JOIN ReactorEnchantEffectEntity EE on R.reactor_id = EE.reactor_id and SP.level = EE.level 
-                WHERE R.reactor_id = ? and SP.level = ? $fixedWhere
+                LEFT JOIN ReactorEnchantEffectEntity EE on R.reactor_id = EE.reactor_id and SP.level = EE.level and EE.enchant_level = ? 
+                WHERE R.reactor_id = ? and SP.level = ?
             """.trimIndent()
             ).use { stmt ->
-                stmt.setString(1, reactorId)
-                stmt.setInt(2, level)
-                if(enchantLevel > 0) stmt.setInt(3, enchantLevel)
+                stmt.setInt(1, enchantLevel)
+                stmt.setString(2, reactorId)
+                stmt.setInt(3, level)
                 stmt.executeQuery().use { rs ->
                     if(rs.next()){
                          equippedReactor = EquippedReactor(
@@ -184,7 +202,7 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                             reactorTier = rs.getString(4),
                             level = rs.getInt(5),
                             reactorEnchantLevel = rs.getInt(6),
-                            statTypeByLevelAndEnchantLevel = rs.getString(7),
+                            statTypeByLevelAndEnchantLevel = rs.getString(7) ?: "",
                             statValueByLevelAndEnchantLevel = rs.getDouble(8),
                             skillAtkPower = rs.getString(9),
                             subSkillAtkPower = rs.getString(10),

@@ -16,8 +16,6 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.MissingFieldException
-import kotlinx.serialization.internal.throwMissingFieldException
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
@@ -47,9 +45,12 @@ fun Application.module() {
 
     routing {
         get("/basic_info") {
-            val titlePrefixId = call.request.queryParameters["title_prefix_id"]!!
-            val titleSuffixId = call.request.queryParameters["title_suffix_id"]!!
-            val descendantId = call.request.queryParameters["descendant_id"]!!
+            val titlePrefixId = call.request.queryParameters["title_prefix_id"]
+            val titleSuffixId = call.request.queryParameters["title_suffix_id"]
+            val descendantId = call.request.queryParameters["descendant_id"]
+            if(titlePrefixId == null || titleSuffixId == null || descendantId == null){
+                return@get call.respond(HttpStatusCode.Forbidden, "Parameter required")
+            }
 
             val basicInfo = fetchFromApp.fetchCloudBasicInfo(descendantId, titlePrefixId, titleSuffixId)
             MethodCounterDto.basicInfo += 1
@@ -66,9 +67,11 @@ fun Application.module() {
         }
 
         get("/weapon_entity"){
-            val weaponId = call.request.queryParameters["weapon_id"]!!
-            val weaponLevel = call.request.queryParameters["weapon_level"]!!.toInt()
-
+            val weaponId = call.request.queryParameters["weapon_id"]
+            val weaponLevel = call.request.queryParameters["weapon_level"]?.toInt()
+            if(weaponId == null || weaponLevel == null){
+                return@get call.respond(HttpStatusCode.Forbidden, "Parameter required")
+            }
             val weaponEntity = fetchFromApp.fetchWeaponEntity(weaponId, weaponLevel)
 
             MethodCounterDto.weaponEntity += 1
@@ -76,10 +79,12 @@ fun Application.module() {
         }
 
         get("/equipped_reactor"){
-            val reactorId = call.request.queryParameters["reactor_id"]!!
-            val level = call.request.queryParameters["level"]?.toInt()!!
-            val enchantLevel = call.request.queryParameters["enchant_level"]?.toInt()!!
-
+            val reactorId = call.request.queryParameters["reactor_id"]
+            val level = call.request.queryParameters["level"]?.toInt()
+            val enchantLevel = call.request.queryParameters["enchant_level"]?.toInt()
+            if(reactorId == null || level == null || enchantLevel == null){
+                return@get call.respond(HttpStatusCode.Forbidden, "Parameter required")
+            }
             val equippedReactor = fetchFromApp.fetchEquippedReactor(reactorId, level, enchantLevel)
 
             MethodCounterDto.eqReactor += 1
@@ -116,6 +121,11 @@ fun Application.module() {
 
             localRepository.updateUserCount(username, rank, rankExp)
             call.respond(HttpStatusCode.OK, "OK")
+        }
+
+        get("/get_notice"){
+            val notice = fetchFromApp.fetchNotice()
+            call.respond(HttpStatusCode.OK, notice)
         }
 
         // routing 제외 DENY

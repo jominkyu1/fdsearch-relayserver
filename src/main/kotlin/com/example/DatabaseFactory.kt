@@ -28,6 +28,17 @@ object DatabaseFactory {
             conn.createStatement().use { stmt ->
                 // Create tables
 
+                //공지용 테이블
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS AppInformation(
+                        key TEXT,
+                        value TEXT,
+                        date DATE DEFAULT (CURRENT_DATE),
+
+                        PRIMARY KEY (key)
+                    )
+                """.trimIndent())
+                
                 // 조회 하루 한번
                 stmt.executeUpdate("""
                     CREATE TABLE IF NOT EXISTS LastCountTime(
