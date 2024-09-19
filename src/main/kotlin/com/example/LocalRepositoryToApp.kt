@@ -5,6 +5,10 @@ import javax.sql.DataSource
 
 class LocalRepositoryToApp(private val dataSource: DataSource) {
 
+    fun getTableName(baseName: String, lang: String): String {
+        return if (lang == "ko") baseName else "${baseName}_EN"
+    }
+
     fun getNotice(): Notice{
         dataSource.connection.use { conn ->
             conn.prepareStatement("""
@@ -52,16 +56,20 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         descendant_id: String = "NOTHING",
         title_prefix_id: String = "NOTHING",
         title_suffix_id: String = "NOTHING",
+        lang: String = "ko"
     ): CloudBasicInfo{
+        val subTable = getTableName("TitleEntity", lang)
+        val table = getTableName("Descendants", lang)
+
         dataSource.connection.use { conn ->
             conn.prepareStatement(
                 """
                     SELECT
                         descendant_name, 
                         descendant_image_url, 
-                    ( SELECT IFNULL(title_name, '') FROM TitleEntity where title_id = ?) as title_prefix_name, 
-                    ( SELECT IFNULL(title_name, '') FROM TitleEntity where title_id = ?) as title_suffix_name 
-                    FROM Descendants 
+                    ( SELECT IFNULL(title_name, '') FROM $subTable where title_id = ?) as title_prefix_name, 
+                    ( SELECT IFNULL(title_name, '') FROM $subTable where title_id = ?) as title_suffix_name 
+                    FROM $table 
                     WHERE descendant_id = ? 
                 """.trimIndent()
             ).use {stmt ->
@@ -85,19 +93,25 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         return CloudBasicInfo()
     }
 
-    fun getEquippedModuleByIdLevel(modules: List<Module>): List<EquippedModule> {
+    fun getEquippedModuleByIdLevel(
+        modules: List<Module>,
+        lang: String = "ko"
+    ): List<EquippedModule> {
         if(modules.isEmpty()) return emptyList()
+        val table = getTableName("ModuleEntity", lang)
+        val joinTable = getTableName("ModuleStatEntity", lang)
 
         val whereConditions = modules.joinToString(" OR ") {
             "(MS.module_id = ${it.module_id} AND MS.level = ${it.module_enchant_level})"
         }
+
         val query =
             """
             SELECT 
             M.Module_Name, M.module_Class, M.module_SocketType, M.module_Type, M.module_Tier, 
             M.image_Url, MS.module_Id, MS.level, module_Capacity, value 
-            FROM ModuleEntity M 
-            INNER JOIN ModuleStatEntity MS ON M.module_id = MS.module_Id 
+            FROM $table M 
+            INNER JOIN $joinTable MS ON M.module_id = MS.module_Id 
             WHERE ${whereConditions}
             """.trimIndent()
         val equippedModule = mutableListOf<EquippedModule>()
@@ -126,16 +140,25 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         return equippedModule
     }
 
-    fun getWeaponEntity(weaponId: String, weaponLevel: Int): WeaponEntity{
+    fun getWeaponEntity(
+        weaponId: String,
+        weaponLevel: Int,
+        lang: String = "ko"
+    ): WeaponEntity{
+        val table = getTableName("WeaponEntity", lang)
+        val joinTable = getTableName("WeaponFirearmEntity", lang)
+        val joinTable2 = getTableName("StatEntity", lang)
+
         dataSource.connection.use { conn ->
             conn.prepareStatement(
                 """
                     SELECT 
                     entity.weapon_id, image_Url, weapon_Name, weapon_PerkAbilityDescription, weapon_PerkAbilityImageUrl, 
-                    weapon_PerkAbilityName, weapon_RoundsType, weapon_Tier, weapon_Type, firearm.firearmAtkValue
-                    FROM WeaponEntity entity 
-                    INNER JOIN WeaponFirearmEntity firearm ON entity.weapon_Id = firearm.weapon_Id
-                    WHERE entity.weapon_id = ? and firearm.level = ? and firearm.firearmAtkType = '105000026'
+                    weapon_PerkAbilityName, weapon_RoundsType, weapon_Tier, weapon_Type, firearm.firearmAtkValue, stat.stat_name
+                    FROM $table entity 
+                    INNER JOIN $joinTable firearm ON entity.weapon_Id = firearm.weapon_Id
+                    INNER JOIN $joinTable2 stat ON firearm.firearmAtkType = stat.stat_id
+                    WHERE firearm.weapon_id = ? and firearm.level = ? 
                 """.trimIndent()
             ).use { stmt ->
                 stmt.setString(1, weaponId)
@@ -152,7 +175,8 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                             weaponRoundsType = rs.getString("weapon_RoundsType"),
                             weaponTier = rs.getString("weapon_Tier"),
                             weaponType = rs.getString("weapon_Type"),
-                            firearmAtkValue = rs.getInt("firearmAtkValue")
+                            firearmAtkValue = rs.getInt("firearmAtkValue"),
+                            statName = rs.getString("stat_name")
                         )
                     }
                 }
@@ -165,9 +189,13 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
     fun getEquippedReactor(
         reactorId: String,
         level: Int,
-        enchantLevel: Int
+        enchantLevel: Int,
+        lang: String = "ko"
     ): EquippedReactor{
         var equippedReactor = EquippedReactor()
+        val table = getTableName("ReactorEntity", lang)
+        val innerTable = getTableName("ReactorSkillPowerEntity", lang)
+        val leftTable = getTableName("ReactorEnchantEffectEntity", lang)
 
         dataSource.connection.use { conn ->
             conn.prepareStatement("""
@@ -184,9 +212,9 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                     SP.sub_skill_atk_power,
                     R.optimized_condition_type,
                     R.image_url
-                FROM ReactorEntity R 
-                INNER JOIN ReactorSkillPowerEntity SP on R.reactor_id = SP.reactor_id 
-                LEFT JOIN ReactorEnchantEffectEntity EE on R.reactor_id = EE.reactor_id and SP.level = EE.level and EE.enchant_level = ? 
+                FROM $table R 
+                INNER JOIN $innerTable SP on R.reactor_id = SP.reactor_id 
+                LEFT JOIN $leftTable EE on R.reactor_id = EE.reactor_id and SP.level = EE.level and EE.enchant_level = ? 
                 WHERE R.reactor_id = ? and SP.level = ?
             """.trimIndent()
             ).use { stmt ->
@@ -213,11 +241,12 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                 }
             }
 
+            val table2 = getTableName("ReactorSkillPowerCoefficientEntity", lang)
             conn.prepareStatement("""
                 SELECT
                     coefficient_stat_id,
                     coefficient_stat_value
-                FROM ReactorSkillPowerCoefficientEntity
+                FROM $table2
                 WHERE reactor_id = ? and level = ?
             """.trimIndent()
             ).use {stmt ->
@@ -239,11 +268,18 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         return equippedReactor
     }
 
-    fun getEquippedExternal(externals: List<ExternalComponent>): List<EquippedExternal> {
+    fun getEquippedExternal(
+        externals: List<ExternalComponent>,
+        lang: String = "ko"
+    ): List<EquippedExternal> {
         val equipExternals: MutableList<EquippedExternal> = mutableListOf()
         val whereCondition = externals.joinToString(","){
             "('${it.externalComponentId}', ${it.externalComponentLevel})"
         }
+
+        val table = getTableName("ExternalCompEntity", lang)
+        val innerBaseTable = getTableName("ExternalCompBaseStatEntity", lang)
+        val innerStatTable = getTableName("StatEntity", lang)
 
         dataSource.connection.use { conn ->
             conn.autoCommit = false
@@ -261,9 +297,9 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                     stat.stat_name,
                     exBase.stat_value
 
-                FROM ExternalCompEntity ex
-                INNER JOIN ExternalCompBaseStatEntity exBase ON ex.external_component_id = exBase.external_component_id
-                INNER JOIN StatEntity stat ON exBase.stat_id = stat.stat_id
+                FROM $table ex
+                INNER JOIN $innerBaseTable exBase ON ex.external_component_id = exBase.external_component_id
+                INNER JOIN $innerStatTable stat ON exBase.stat_id = stat.stat_id
                 WHERE (ex.external_component_id, exBase.level) IN ($whereCondition)
             """.trimIndent()
             ).use { stmt ->
@@ -287,6 +323,7 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
             val whereCondition2 = externals.joinToString(",") {
                 "'${it.externalComponentId}'"
             }
+            val table2 = getTableName("ExternalCompSetOptionEntity", lang)
             conn.prepareStatement(
                 """
                 SELECT
@@ -296,8 +333,8 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                     A.set_option_effect,
                     B.set_count,
                     B.set_option_effect
-                FROM ExternalCompSetOptionEntity A
-                INNER JOIN ExternalCompSetOptionEntity B
+                FROM $table2 A
+                INNER JOIN $table2 B
                     ON A.external_component_id = B.external_component_id AND B.set_count = 4
                 WHERE A.external_component_id
                           IN ($whereCondition2)

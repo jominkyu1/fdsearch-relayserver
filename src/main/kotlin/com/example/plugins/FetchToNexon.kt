@@ -2,6 +2,7 @@ package com.example.plugins
 
 import com.example.DatabaseFactory
 import com.example.LocalRepository
+import com.example.LocalRepositoryEN
 import com.example.data.*
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -14,6 +15,8 @@ import org.slf4j.LoggerFactory
 val client = HttpClient(CIO)
 private val logger = LoggerFactory.getLogger("FetchToNexon")
 private val localRepository = LocalRepository(DatabaseFactory.dataSource)
+private val localEnRepository = LocalRepositoryEN(DatabaseFactory.dataSource)
+
 private val json = Json {
     ignoreUnknownKeys = true // 맵핑되는 필드가 없을때 무시
     coerceInputValues = true // NULL 기본값 처리
@@ -29,7 +32,10 @@ suspend fun fetchDescendantOriginalData(language_code: String){
     val decodedList: List<DescendantOriginalData> = json.decodeFromString(response)
     fetchLog("descendant.json", decodedList.size)
 
-    localRepository.insertDescendantsMetadata(decodedList)
+    when(language_code){
+        "ko" -> { localRepository.insertDescendantsMetadata(decodedList) }
+        "en" -> { localEnRepository.insertDescendantsMetadata(decodedList) }
+    }
 }
 
 suspend fun fetchTitleOriginalData(language_code: String){
@@ -37,7 +43,10 @@ suspend fun fetchTitleOriginalData(language_code: String){
     val decodedList: List<TitleOriginalData> = json.decodeFromString(response)
     fetchLog("title.json", decodedList.size)
 
-    localRepository.insertTitleMetadata(decodedList)
+    when(language_code){
+        "ko" -> { localRepository.insertTitleMetadata(decodedList) }
+        "en" -> { localEnRepository.insertTitleMetadata(decodedList) }
+    }
 }
 
 suspend fun fetchWeaponOriginalData(language_code: String){
@@ -45,7 +54,10 @@ suspend fun fetchWeaponOriginalData(language_code: String){
     val decodedList: List<WeaponOriginalData> = json.decodeFromString(response)
     fetchLog("weapon.json", decodedList.size)
 
-    localRepository.insertWeaponMetadata(decodedList)
+    when(language_code){
+        "ko" -> { localRepository.insertWeaponMetadata(decodedList) }
+        "en" -> { localEnRepository.insertWeaponMetadata(decodedList) }
+    }
 }
 
 suspend fun fetchStatOriginalData(language_code: String){
@@ -53,7 +65,10 @@ suspend fun fetchStatOriginalData(language_code: String){
     val decodedList: List<StatOriginalData> = json.decodeFromString(response)
     fetchLog("stat.json", decodedList.size)
 
-    localRepository.insertStatMetaData(decodedList)
+    when(language_code){
+        "ko" -> { localRepository.insertStatMetaData(decodedList) }
+        "en" -> { localEnRepository.insertStatMetaData(decodedList) }
+    }
 }
 
 suspend fun fetchModuleOriginalData(language_code: String){
@@ -61,7 +76,10 @@ suspend fun fetchModuleOriginalData(language_code: String){
     val decodedList: List<ModuleOriginalData> = json.decodeFromString(response)
     fetchLog("module.json", decodedList.size)
 
-    localRepository.insertModuleMetaData(decodedList)
+    when(language_code){
+        "ko" -> { localRepository.insertModuleMetaData(decodedList) }
+        "en" -> { localEnRepository.insertModuleMetaData(decodedList) }
+    }
 }
 
 suspend fun fetchReactorOriginalData(language_code: String){
@@ -69,7 +87,10 @@ suspend fun fetchReactorOriginalData(language_code: String){
     val decodedList: List<ReactorOriginalData> = json.decodeFromString(response)
     fetchLog("reactor.json", decodedList.size)
 
-    localRepository.insertReactorMetaData(decodedList)
+    when(language_code){
+        "ko" -> { localRepository.insertReactorMetaData(decodedList) }
+        "en" -> { localEnRepository.insertReactorMetaData(decodedList) }
+    }
 }
 
 suspend fun fetchExternalOriginalData(language_code: String){
@@ -77,5 +98,8 @@ suspend fun fetchExternalOriginalData(language_code: String){
     val decodedList: List<ExternalComponentOriginalData> = json.decodeFromString(response)
     fetchLog("external.component.json", decodedList.size)
 
-    localRepository.insertExternalCompMetaData(decodedList)
+    when(language_code){
+        "ko" -> { localRepository.insertExternalCompMetaData(decodedList) }
+        "en" -> { localEnRepository.insertExternalCompMetaData(decodedList) }
+    }
 }

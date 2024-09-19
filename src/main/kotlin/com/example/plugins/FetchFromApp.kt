@@ -20,35 +20,40 @@ class FetchFromApp{
         descendant_id: String,
         title_prefix_id: String,
         title_suffix_id: String,
+        lang: String = "ko",
     ): CloudBasicInfo{
-        return localRepository.getCloudBasicInfo(descendant_id, title_prefix_id, title_suffix_id)
+        return localRepository.getCloudBasicInfo(descendant_id, title_prefix_id, title_suffix_id, lang)
     }
 
     fun fetchEquippedModule(
-        modules: List<Module>
+        modules: List<Module>,
+        lang: String = "ko"
     ): List<EquippedModule>{
-        return localRepository.getEquippedModuleByIdLevel(modules)
+        return localRepository.getEquippedModuleByIdLevel(modules, lang)
     }
 
     fun fetchWeaponEntity(
         weaponId: String,
-        weaponLevel: Int
+        weaponLevel: Int,
+        lang: String = "ko"
     ): WeaponEntity {
-        return localRepository.getWeaponEntity(weaponId, weaponLevel)
+        return localRepository.getWeaponEntity(weaponId, weaponLevel, lang)
     }
 
     fun fetchEquippedReactor(
         reactorId: String,
         level: Int,
-        enchantLevel: Int
+        enchantLevel: Int,
+        lang: String = "ko"
     ): EquippedReactor {
-        return localRepository.getEquippedReactor(reactorId, level, enchantLevel)
+        return localRepository.getEquippedReactor(reactorId, level, enchantLevel, lang)
     }
 
     fun fetchEquippedExternal(
-        externals: List<ExternalComponent>
+        externals: List<ExternalComponent>,
+        lang: String = "ko"
     ): List<EquippedExternal>{
-        return localRepository.getEquippedExternal(externals)
+        return localRepository.getEquippedExternal(externals, lang)
     }
 
     fun fetchNotice(): Notice {

@@ -7,6 +7,7 @@ import com.example.plugins.FetchFromApp
 import com.example.plugins.configureMonitoring
 import com.example.plugins.email.MethodCounterDto
 import com.example.plugins.email.setupShceduler
+import com.example.plugins.fetchWeaponOriginalData
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -29,9 +30,13 @@ fun main() {
 }
 
 fun Application.module() {
-    DatabaseFactory.init(MODE.CLOUD) // DB Init
+    DatabaseFactory.init(MODE.LOCAL) // DB Init
 
     DatabaseFactory.createTable() // Create Tables
+    DatabaseFactory.createTableEn() // Create EN Tables
+
+    //FetchMetadataEnJob().execute()
+
     fetchFromApp = FetchFromApp()
     localRepository = LocalRepository(DatabaseFactory.dataSource)
     install(ContentNegotiation) {
@@ -43,24 +48,28 @@ fun Application.module() {
     setupShceduler()
     configureMonitoring()
 
+
     routing {
         get("/basic_info") {
             val titlePrefixId = call.request.queryParameters["title_prefix_id"]
             val titleSuffixId = call.request.queryParameters["title_suffix_id"]
             val descendantId = call.request.queryParameters["descendant_id"]
+            val lang = call.request.queryParameters["lang"] ?: "ko"
+
             if(titlePrefixId == null || titleSuffixId == null || descendantId == null){
                 return@get call.respond(HttpStatusCode.Forbidden, "Parameter required")
             }
 
-            val basicInfo = fetchFromApp.fetchCloudBasicInfo(descendantId, titlePrefixId, titleSuffixId)
+            val basicInfo = fetchFromApp.fetchCloudBasicInfo(descendantId, titlePrefixId, titleSuffixId, lang)
             MethodCounterDto.basicInfo += 1
             call.respond(basicInfo)
         }
 
         post("/equipped_module"){
             val modules = call.receive<List<Module>>()
+            val lang = call.request.headers["lang"] ?: "ko"
 
-            val equippedModules = fetchFromApp.fetchEquippedModule(modules)
+            val equippedModules = fetchFromApp.fetchEquippedModule(modules, lang)
 
             MethodCounterDto.eqModule += 1
             call.respond(equippedModules)
@@ -72,7 +81,9 @@ fun Application.module() {
             if(weaponId == null || weaponLevel == null){
                 return@get call.respond(HttpStatusCode.Forbidden, "Parameter required")
             }
-            val weaponEntity = fetchFromApp.fetchWeaponEntity(weaponId, weaponLevel)
+            val lang = call.request.queryParameters["lang"] ?: "ko"
+
+            val weaponEntity = fetchFromApp.fetchWeaponEntity(weaponId, weaponLevel, lang)
 
             MethodCounterDto.weaponEntity += 1
             call.respond(weaponEntity)
@@ -85,7 +96,8 @@ fun Application.module() {
             if(reactorId == null || level == null || enchantLevel == null){
                 return@get call.respond(HttpStatusCode.Forbidden, "Parameter required")
             }
-            val equippedReactor = fetchFromApp.fetchEquippedReactor(reactorId, level, enchantLevel)
+            val lang = call.request.queryParameters["lang"] ?: "ko"
+            val equippedReactor = fetchFromApp.fetchEquippedReactor(reactorId, level, enchantLevel, lang)
 
             MethodCounterDto.eqReactor += 1
             call.respond(equippedReactor)
@@ -93,7 +105,9 @@ fun Application.module() {
 
         post("/equipped_external"){
             val externals = call.receive<List<ExternalComponent>>()
-            val equippedExternal = fetchFromApp.fetchEquippedExternal(externals)
+            val lang = call.request.headers["lang"] ?: "ko"
+
+            val equippedExternal = fetchFromApp.fetchEquippedExternal(externals, lang)
 
             MethodCounterDto.eqExternal += 1
             call.respond(equippedExternal)
