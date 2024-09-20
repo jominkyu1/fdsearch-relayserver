@@ -2,7 +2,7 @@
 GET http://127.0.0.1:8080/basic_info?title_prefix_id=270300112&title_suffix_id=270310083&descendant_id=101000021&lang=en
 
 ### 착용중인 무기 조회
-GET http://127.0.0.1:8080/weapon_entity?weapon_id=211103002&weapon_level=100&lang=en
+GET http://127.0.0.1:8080/weapon_entity?weapon_id=211103002&weapon_level=100
 
 ### 장착 모듈 조회
 GET http://127.0.0.1:8080/equipped_reactor?reactor_id=245001669&level=100&enchant_level=2&lang=en

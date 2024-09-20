@@ -13,6 +13,13 @@ data class WeaponEntity (
     val weaponRoundsType: String = "NOT FOUND",
     val weaponTier: String = "NOT FOUND",
     val weaponType: String = "NOT FOUND",
-    val firearmAtkValue: Int = -1,
-    val statName: String = "NOT FOUND"
+
+    val statValue: Int = -1,
+    val statName: String = "NOT FOUND",
+
+    val statValue2: Int = -1,
+    val statName2: String = "NOT FOUND",
+
+    val statValue3: Int = -1,
+    val statName3: String = "NOT FOUND",
 )

@@ -146,19 +146,31 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         lang: String = "ko"
     ): WeaponEntity{
         val table = getTableName("WeaponEntity", lang)
-        val joinTable = getTableName("WeaponFirearmEntity", lang)
-        val joinTable2 = getTableName("StatEntity", lang)
+        val firearmTable = getTableName("WeaponFirearmEntity", lang)
+        val statTable = getTableName("StatEntity", lang)
+        val baseStatTable = getTableName("WeaponBaseStatEntity", lang)
 
         dataSource.connection.use { conn ->
             conn.prepareStatement(
                 """
-                    SELECT 
-                    entity.weapon_id, image_Url, weapon_Name, weapon_PerkAbilityDescription, weapon_PerkAbilityImageUrl, 
-                    weapon_PerkAbilityName, weapon_RoundsType, weapon_Tier, weapon_Type, firearm.firearmAtkValue, stat.stat_name
-                    FROM $table entity 
-                    INNER JOIN $joinTable firearm ON entity.weapon_Id = firearm.weapon_Id
-                    INNER JOIN $joinTable2 stat ON firearm.firearmAtkType = stat.stat_id
-                    WHERE firearm.weapon_id = ? and firearm.level = ? 
+                    SELECT
+                        we.weapon_id, image_Url, weapon_Name, weapon_PerkAbilityDescription, weapon_PerkAbilityImageUrl,
+                        weapon_PerkAbilityName, weapon_RoundsType, weapon_Tier, weapon_Type,
+                        
+                        s1.stat_name AS stat_name,
+                        wfe.firearmAtkValue as stat_value,
+                        s2.stat_name AS stat_name2,
+                        wbs2.stat_value AS stat_value2,
+                        s3.stat_name AS stat_name3,
+                        wbs3.stat_value AS stat_value3
+                    FROM $table we
+                             INNER JOIN $firearmTable wfe ON we.weapon_Id = wfe.weapon_Id
+                             INNER JOIN $statTable s1 ON wfe.firearmAtkType = s1.stat_id
+                             LEFT JOIN $baseStatTable wbs2 ON we.weapon_Id = wbs2.weapon_Id AND wbs2.stat_id = '105000021'
+                             LEFT JOIN $statTable s2 ON s2.stat_id = '105000021'
+                             LEFT JOIN $baseStatTable wbs3 ON we.weapon_Id = wbs3.weapon_Id AND wbs3.stat_id = '105000023'
+                             LEFT JOIN $statTable s3 ON s3.stat_id = '105000023'
+                    WHERE wfe.weapon_id = ? AND wfe.level = ?;
                 """.trimIndent()
             ).use { stmt ->
                 stmt.setString(1, weaponId)
@@ -175,8 +187,15 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                             weaponRoundsType = rs.getString("weapon_RoundsType"),
                             weaponTier = rs.getString("weapon_Tier"),
                             weaponType = rs.getString("weapon_Type"),
-                            firearmAtkValue = rs.getInt("firearmAtkValue"),
-                            statName = rs.getString("stat_name")
+
+                            statValue = rs.getInt("stat_value"),
+                            statName = rs.getString("stat_name"),
+
+                            statValue2 = rs.getInt("stat_value2"),
+                            statName2 = rs.getString("stat_name2"),
+
+                            statValue3 = rs.getInt("stat_value3"),
+                            statName3 = rs.getString("stat_name3")
                         )
                     }
                 }
