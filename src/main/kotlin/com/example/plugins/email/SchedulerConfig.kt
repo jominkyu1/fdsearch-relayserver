@@ -53,17 +53,10 @@ fun setupShceduler(){
         .withSchedule(CronScheduleBuilder.cronSchedule("0 0 13 ? * 5 *"))
         .build()
 
-    // 일주일 단위 (매주 목요일 13:00)
-    // CRON 초 분 시 일 월 요일 연도
-    val weeklyTrigger2: Trigger = TriggerBuilder.newTrigger()
-        .withIdentity("logWeeklyTrigger2")
-        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 13 ? * 5 *"))
-        .build()
-
-    //1분 단위 [테스트용]
+    //5분 단위 [테스트용]
     val minuteTrigger: Trigger = TriggerBuilder.newTrigger()
         .withIdentity(("repeatMinuteForeverTrigger"))
-        .withSchedule(SimpleScheduleBuilder.repeatMinutelyForever())
+        .withSchedule(SimpleScheduleBuilder.repeatMinutelyForever(5))
         .build()
     try{
         StdSchedulerFactory.getDefaultScheduler().apply{

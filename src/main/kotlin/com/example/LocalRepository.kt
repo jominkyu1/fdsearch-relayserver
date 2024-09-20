@@ -7,9 +7,10 @@ import java.time.LocalDate
 import javax.sql.DataSource
 
 class LocalRepository(private val dataSource: DataSource) {
-    private fun insertLog(name: String, size: Int = 0) {
-        logger.info("Inserted $name to Local Server")
-    }
+//    private fun insertLog(name: String, size: Int = 0) {
+//        logger.info("Inserted $name to Local Server")
+//    }
+
     fun clearCountTime(){
         dataSource.connection.use { conn ->
             conn.prepareStatement("""
@@ -150,7 +151,7 @@ class LocalRepository(private val dataSource: DataSource) {
 
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("Modules", modules.size)
+//                insertLog("Modules", modules.size)
             }
 
             // ModuleStatEntity 테이블
@@ -172,7 +173,7 @@ class LocalRepository(private val dataSource: DataSource) {
 
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("ModuleStat", modules.size)
+//                insertLog("ModuleStat", modules.size)
             }
         }
     }
@@ -195,7 +196,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("Descendants", descendants.size)
+//                insertLog("Descendants", descendants.size)
             }
 
             //DescendantSkills 테이블
@@ -218,7 +219,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("Descendants Skill Entity (List Size) ", descendants.sumOf { it.descendant_skill.size })
+//                insertLog("Descendants Skill Entity (List Size) ", descendants.sumOf { it.descendant_skill.size })
             }
 
             //DescendantStatDetail 테이블
@@ -241,7 +242,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("Descendants Stat Detail Entity (List Size) ", descendants.sumOf { it.descendant_stat.size})
+//                insertLog("Descendants Stat Detail Entity (List Size) ", descendants.sumOf { it.descendant_stat.size})
             }
         }
     }
@@ -262,7 +263,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("TitleEntity", titles.size)
+//                insertLog("TitleEntity", titles.size)
             }
         }
     }
@@ -285,7 +286,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("Stat Entity", stats.size)
+//                insertLog("Stat Entity", stats.size)
             }
         }
     }
@@ -317,7 +318,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("Weapon Entity", weapons.size)
+//                insertLog("Weapon Entity", weapons.size)
             }
 
             // WeaponBaseStatEntity 테이블
@@ -337,7 +338,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("Weapon BaseStat Entity", weapons.sumOf { it.base_stat.size })
+//                insertLog("Weapon BaseStat Entity", weapons.sumOf { it.base_stat.size })
             }
 
             // WeaponFirearmEntity 테이블
@@ -369,7 +370,7 @@ class LocalRepository(private val dataSource: DataSource) {
                     }
                     stmt.executeBatch()
                     conn.commit()
-                    insertLog("Weapon Firearm Entity (Chunk)", chunk.size)
+//                    insertLog("Weapon Firearm Entity (Chunk)", chunk.size)
                 }
             }
         }
@@ -395,7 +396,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("Reactor Entity", reactors.size)
+//                insertLog("Reactor Entity", reactors.size)
             }
 
             //ReactorSkillPowerEntity
@@ -415,7 +416,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("ReactorSkillPower Entity")
+//                insertLog("ReactorSkillPower Entity")
             }
 
 
@@ -439,7 +440,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("ReactorEnchantEffect Entity")
+//                insertLog("ReactorEnchantEffect Entity")
             }
             //ReactorSkillPowerCoefficientEntity
             // reactor_id , level , coefficient_stat_id , coefficient_stat_value ,
@@ -460,7 +461,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("ReactorSkillPowerCoefficient Entity")
+//                insertLog("ReactorSkillPowerCoefficient Entity")
             }
         }
     }
@@ -483,7 +484,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("ExternalComp Entity")
+//                insertLog("ExternalComp Entity")
             }
 
             conn.prepareStatement("""
@@ -501,7 +502,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("ExternalComp BaseStat Entity")
+//                insertLog("ExternalComp BaseStat Entity")
             }
 
             conn.prepareStatement("""
@@ -519,7 +520,7 @@ class LocalRepository(private val dataSource: DataSource) {
                 }
                 stmt.executeBatch()
                 conn.commit()
-                insertLog("ExternalComp SetOption Entity")
+//                insertLog("ExternalComp SetOption Entity")
             }
         }
     }

@@ -7,7 +7,6 @@ import com.example.plugins.FetchFromApp
 import com.example.plugins.configureMonitoring
 import com.example.plugins.email.MethodCounterDto
 import com.example.plugins.email.setupShceduler
-import com.example.plugins.fetchWeaponOriginalData
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -30,12 +29,10 @@ fun main() {
 }
 
 fun Application.module() {
-    DatabaseFactory.init(MODE.LOCAL) // DB Init
+    DatabaseFactory.init(MODE.CLOUD) // DB Init
 
     DatabaseFactory.createTable() // Create Tables
     DatabaseFactory.createTableEn() // Create EN Tables
-
-    //FetchMetadataEnJob().execute()
 
     fetchFromApp = FetchFromApp()
     localRepository = LocalRepository(DatabaseFactory.dataSource)

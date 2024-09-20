@@ -2,8 +2,6 @@ package com.example.plugins.email
 
 import com.example.DatabaseFactory
 import com.example.LocalRepository
-import io.ktor.server.application.*
-import kotlinx.coroutines.coroutineScope
 import org.quartz.Job
 import org.quartz.JobExecutionContext
 import org.slf4j.LoggerFactory
