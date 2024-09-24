@@ -17,4 +17,6 @@ data class EquippedModule(
     val level: Int,
     val moduleCapacity: Int,
     val value: String, // 치명타 저항력 +1~15% ..etc
-)
+) {
+    var calcStat = listOf<StatTypeValue>()
+}

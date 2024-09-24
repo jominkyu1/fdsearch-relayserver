@@ -8,4 +8,6 @@ data class CloudBasicInfo (
     val title_suffix_name: String = "NO DATA",
     val descendant_name: String = "NO DATA",
     val descendant_image_url: String = "NO DATA",
-)
+) {
+    var statlist: List<StatTypeValue> = mutableListOf()
+}

@@ -5,8 +5,38 @@ import javax.sql.DataSource
 
 class LocalRepositoryToApp(private val dataSource: DataSource) {
 
-    fun getTableName(baseName: String, lang: String): String {
+    private fun getTableName(baseName: String, lang: String): String {
         return if (lang == "ko") baseName else "${baseName}_EN"
+    }
+
+    fun getCalcStatTypeValue(moduleIdValue: List<Pair<String, Int>>): List<StatTypeValue> {
+        val statTypeValueList = mutableListOf<StatTypeValue>()
+        if(moduleIdValue.isEmpty()) return statTypeValueList
+
+        val whereConditions = moduleIdValue.joinToString(" OR ") {
+            "(module_id = ${it.first} AND level = ${it.second})"
+        }
+
+        val query = """
+            SELECT type, sum(value) as value
+                FROM ModuleStatCalc 
+                WHERE $whereConditions 
+                GROUP BY type
+        """.trimIndent()
+
+        dataSource.connection.use { conn ->
+            conn.prepareStatement(query).use { stmt ->
+                val rs = stmt.executeQuery()
+                while(rs.next()){
+                    val stat = StatTypeValue(
+                        statType = rs.getString("type"),
+                        statValue = rs.getString("value")
+                    )
+                    statTypeValueList.add(stat)
+                }
+            }
+        }
+        return statTypeValueList
     }
 
     fun getNotice(): Notice{
@@ -50,6 +80,34 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
             }
         }
         return ranklist
+    }
+    fun getDescendantStats(
+        descendant_id: String,
+        descendant_level: Int,
+        lang: String = "ko"
+    ): List<StatTypeValue> {
+        val statlist = mutableListOf<StatTypeValue>()
+        val table = getTableName("DescendantStatDetail", lang)
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("""
+                SELECT stat_type, stat_value
+                FROM $table
+                WHERE descendant_id = ? and level = ?
+            """.trimIndent()
+            ).use { stmt ->
+                stmt.setString(1, descendant_id)
+                stmt.setInt(2, descendant_level)
+                val rs = stmt.executeQuery()
+                while(rs.next()){
+                    val stat = StatTypeValue(
+                        statType = rs.getString("stat_type"),
+                        statValue = rs.getString("stat_value")
+                    )
+                    statlist.add(stat)
+                }
+            }
+        }
+        return statlist
     }
 
     fun getCloudBasicInfo(

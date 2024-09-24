@@ -3,6 +3,8 @@ package com.example
 import com.example.dto.ExternalComponent
 import com.example.dto.Module
 import com.example.dto.RankList
+import com.example.dto.StatTypeValue
+import com.example.plugins.ExtractStatHelper
 import com.example.plugins.FetchFromApp
 import com.example.plugins.configureMonitoring
 import com.example.plugins.email.MethodCounterDto
@@ -29,7 +31,7 @@ fun main() {
 }
 
 fun Application.module() {
-    DatabaseFactory.init(MODE.CLOUD) // DB Init
+    DatabaseFactory.init(MODE.LOCAL) // DB Init
 
     DatabaseFactory.createTable() // Create Tables
     DatabaseFactory.createTableEn() // Create EN Tables
@@ -42,6 +44,9 @@ fun Application.module() {
             coerceInputValues = true // NULL -> 기본값
         })
     }
+
+    ExtractStatHelper.initModuleStatCalc()
+
     setupShceduler()
     configureMonitoring()
 
@@ -51,13 +56,16 @@ fun Application.module() {
             val titlePrefixId = call.request.queryParameters["title_prefix_id"]
             val titleSuffixId = call.request.queryParameters["title_suffix_id"]
             val descendantId = call.request.queryParameters["descendant_id"]
+            val descendantLevel = call.request.queryParameters["descendant_level"]?.toInt()
             val lang = call.request.queryParameters["lang"] ?: "ko"
 
-            if(titlePrefixId == null || titleSuffixId == null || descendantId == null){
+            if(titlePrefixId == null || titleSuffixId == null || descendantId == null || descendantLevel == null){
                 return@get call.respond(HttpStatusCode.Forbidden, "Parameter required")
             }
 
             val basicInfo = fetchFromApp.fetchCloudBasicInfo(descendantId, titlePrefixId, titleSuffixId, lang)
+            basicInfo.statlist = fetchFromApp.fetchDescendantStats(descendantId, descendantLevel, lang)
+
             MethodCounterDto.basicInfo += 1
             call.respond(basicInfo)
         }
@@ -67,6 +75,11 @@ fun Application.module() {
             val lang = call.request.headers["lang"] ?: "ko"
 
             val equippedModules = fetchFromApp.fetchEquippedModule(modules, lang)
+            val calcStatList = fetchFromApp.getCalcStatTypeValue(equippedModules.map {
+                it.moduleId to it.level
+            })
+            if(calcStatList.isNotEmpty()) equippedModules[0].calcStat = calcStatList
+            // 치명타 확률, 치명타 배율 등 계산된 결과 0번 인덱스
 
             MethodCounterDto.eqModule += 1
             call.respond(equippedModules)

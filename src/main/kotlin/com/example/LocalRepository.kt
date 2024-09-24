@@ -1,15 +1,56 @@
 package com.example
 
 import com.example.data.*
+import com.example.plugins.ModuleStatCalc
+import com.example.plugins.RawModuleStat
 import com.example.plugins.email.EndpointEnum
-import com.example.plugins.email.MethodCounterDto
 import java.time.LocalDate
 import javax.sql.DataSource
 
 class LocalRepository(private val dataSource: DataSource) {
-//    private fun insertLog(name: String, size: Int = 0) {
-//        logger.info("Inserted $name to Local Server")
-//    }
+
+    fun insertModuleStatCalc(list: List<ModuleStatCalc>){
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("""
+                INSERT OR REPLACE INTO ModuleStatCalc (module_id, level, type, value) 
+                VALUES (?, ?, ?, ?)
+            """.trimIndent()
+            ).use { stmt ->
+                list.forEach { calc ->
+                    stmt.setString(1, calc.moduleId)
+                    stmt.setInt(2, calc.level)
+                    stmt.setString(3, calc.type)
+                    stmt.setString(4, calc.value)
+                    stmt.addBatch()
+                }
+                stmt.executeBatch()
+            }
+        }
+    }
+
+    fun getRawModuleStat(moduleId: String): List<RawModuleStat> {
+        val list = mutableListOf<RawModuleStat>()
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("""
+                SELECT module_id, level, replace(value, ' ', ' ') 
+                FROM ModuleStatEntity
+                WHERE module_Id = ?
+            """.trimIndent()
+            ).use { stmt ->
+                stmt.setString(1, moduleId)
+                val rs = stmt.executeQuery()
+                while(rs.next()) {
+                    val raw = RawModuleStat(
+                        moduleId = rs.getString(1),
+                        level = rs.getInt(2),
+                        value = rs.getString(3)
+                    )
+                    list.add(raw)
+                }
+            }
+        }
+        return list
+    }
 
     fun clearCountTime(){
         dataSource.connection.use { conn ->

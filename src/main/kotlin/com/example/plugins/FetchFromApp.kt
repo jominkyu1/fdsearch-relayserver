@@ -16,6 +16,14 @@ class FetchFromApp{
         return localRepository.getRankList()
     }
 
+    fun fetchDescendantStats(
+        descendant_id: String,
+        descendant_level: Int,
+        lang: String
+    ): List<StatTypeValue>{
+        return localRepository.getDescendantStats(descendant_id, descendant_level, lang)
+    }
+
     fun fetchCloudBasicInfo(
         descendant_id: String,
         title_prefix_id: String,
@@ -58,5 +66,9 @@ class FetchFromApp{
 
     fun fetchNotice(): Notice {
         return localRepository.getNotice()
+    }
+
+    fun getCalcStatTypeValue(list: List<Pair<String, Int>>): List<StatTypeValue> {
+        return localRepository.getCalcStatTypeValue(list)
     }
 }

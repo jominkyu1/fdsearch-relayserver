@@ -242,6 +242,18 @@ object DatabaseFactory {
             conn.createStatement().use { stmt ->
                 // Create tables
 
+                //분리된 모듈 스탯 테이블
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS ModuleStatCalc(
+                        module_id TEXT,
+                        level INTEGER,
+                        type TEXT,
+                        value TEXT,
+                        
+                        PRIMARY KEY (module_id, level)
+                    )
+                """.trimIndent())
+
                 //공지용 테이블
                 stmt.executeUpdate("""
                     CREATE TABLE IF NOT EXISTS AppInformation(
