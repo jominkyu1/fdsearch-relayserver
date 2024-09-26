@@ -250,8 +250,12 @@ object DatabaseFactory {
                         type TEXT,
                         value TEXT,
                         
-                        PRIMARY KEY (module_id, level)
+                        PRIMARY KEY (module_id, level, type)
                     )
+                """.trimIndent())
+                //분리된 모듈 스탯 테이블 인덱스 추가
+                stmt.executeUpdate("""
+                CREATE INDEX IF NOT EXISTS idx_module_id_level ON ModuleStatCalc(module_id, level)
                 """.trimIndent())
 
                 //공지용 테이블

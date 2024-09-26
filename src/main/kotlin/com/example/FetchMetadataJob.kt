@@ -36,6 +36,10 @@ class FetchMetadataJob : Job {
             enTasks.awaitAll()
             logger.info("### ENGLISH METADATA DONE ###")
             logger.info("### 넥슨 메타데이터 조회 스케쥴 끝 ###")
+
+            logger.info("### 스탯 분리 스케쥴 시작 ###")
+            ExtractStatHelper.initModuleStatCalc()
+            logger.info("### 스탯 분리 스케쥴 끝 ###")
         }
     }
 }

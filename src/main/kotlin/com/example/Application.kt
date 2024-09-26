@@ -3,7 +3,6 @@ package com.example
 import com.example.dto.ExternalComponent
 import com.example.dto.Module
 import com.example.dto.RankList
-import com.example.dto.StatTypeValue
 import com.example.plugins.ExtractStatHelper
 import com.example.plugins.FetchFromApp
 import com.example.plugins.configureMonitoring
@@ -31,7 +30,7 @@ fun main() {
 }
 
 fun Application.module() {
-    DatabaseFactory.init(MODE.LOCAL) // DB Init
+    DatabaseFactory.init(MODE.CLOUD) // DB Init
 
     DatabaseFactory.createTable() // Create Tables
     DatabaseFactory.createTableEn() // Create EN Tables
