@@ -53,6 +53,24 @@ object ExtractStatHelper {
     private lateinit var recoilList: MutableList<Int>
     //발사 속도(Fire Rate)
     private lateinit var fireRateList: MutableList<Int>
+    //일반탄 최대량 (Max General Rounds)
+    private lateinit var maxGeneralList: MutableList<Int>
+
+    //충격탄 최대량 (Max Impact Rounds)
+    private lateinit var maxImpactList: MutableList<Int>
+    //특수탄 최대량 (Max Special Rounds)
+    private lateinit var maxSpecialList: MutableList<Int>
+    //고위력탄 최대량 (Max High-Power Rounds)
+    private lateinit var maxHPowerList: MutableList<Int>
+
+    //이동속도(Movement Speed)
+    private lateinit var movementSpeedList: MutableList<Int>
+    //조준중 이동속도(Movement Speed While Aiming)
+    private lateinit var movementSpeedWhileAimingList: MutableList<Int>
+    //조준시 약점 배율(Weak Point DMG when Aiming)
+    private lateinit var weakPointDmgAiming: MutableList<Int>
+    //무기 교체 속도(Weapon Change Speed)
+    private lateinit var weaponChangeList: MutableList<Int>
 
     //총기 치명타 확률
     private val criHitRateList: MutableList<Int> = mutableListOf()
@@ -106,7 +124,8 @@ object ExtractStatHelper {
         val descendantList = listOf(
             maxHpList, maxMpList, defList,
             maxShieldList, mpRecoveryList, hpRecoveryList,
-            hpHealList, incomingDmgModList, outgoingDmgModList
+            hpHealList, incomingDmgModList, outgoingDmgModList,
+            movementSpeedList, movementSpeedWhileAimingList
         )
 
         /**스킬 관련 리스트*/
@@ -127,9 +146,10 @@ object ExtractStatHelper {
         /**무기 관련 리스트*/
         val weaponList = listOf(
             criHitRateList, criHitDmgList, firearmAtkList, rpMagazineList, recoilList,
-            fireRateList, weakDmgList, accuracyList, reloadModList
+            fireRateList, weakDmgList, accuracyList, reloadModList, maxGeneralList,
+            maxImpactList, maxSpecialList, maxHPowerList, weakPointDmgAiming,
+            weaponChangeList
         )
-
 
         startRoutine(descendantList, skillList, weaponList)
     }
@@ -348,6 +368,42 @@ object ExtractStatHelper {
             map["reloadmod"] = extractPattern(raw, regex)
         }
 
+
+        if(maxGeneralList.contains(moduleId)){
+            val regex = """일반탄 최대량\s*([+-]?\d+(\.\d+)?)%""".toRegex()
+            map["maxgeneral"] = extractPattern(raw, regex)
+        }
+        if(maxImpactList.contains(moduleId)){
+            val regex = """충격탄 최대량\s*([+-]?\d+(\.\d+)?)%""".toRegex()
+            map["maximpact"] = extractPattern(raw, regex)
+        }
+        if(maxHPowerList.contains(moduleId)){
+            val regex = """고위력탄 최대량\s*([+-]?\d+(\.\d+)?)%""".toRegex()
+            map["maxhpower"] = extractPattern(raw, regex)
+        }
+        if(maxSpecialList.contains(moduleId)){
+            val regex = """특수탄 최대량\s*([+-]?\d+(\.\d+)?)%""".toRegex()
+            map["maxspecial"] = extractPattern(raw, regex)
+        }
+
+
+        if(movementSpeedList.contains(moduleId)){
+            val regex = """이동 속도\s*([+-]?\d+(\.\d+)?)%""".toRegex()
+            map["movementspeed"] = extractPattern(raw, regex)
+        }
+        if(movementSpeedWhileAimingList.contains(moduleId)){
+            val regex = """조준 중 이동 속도\s*([+-]?\d+(\.\d+)?)%""".toRegex()
+            map["movementspeedwhileaiming"] = extractPattern(raw, regex)
+        }
+        if(weakPointDmgAiming.contains(moduleId)){
+            val regex = """조준 시 약점 배율\s*([+-]?\d+(\.\d+)?)%""".toRegex()
+            map["weakpointaiming"] = extractPattern(raw, regex)
+        }
+        if(weaponChangeList.contains(moduleId)){
+            val regex = """무기 교체 속도\s*([+-]?\d+(\.\d+)?)%""".toRegex()
+            map["weaponchangespeed"] = extractPattern(raw, regex)
+        }
+
         return map
     }
 
@@ -517,5 +573,15 @@ object ExtractStatHelper {
             252032020, 252032022, 252032075, 252032076, 252032078, 252041014,
             252042069, 252042070, 252042071, 252042079
         )
+
+        maxGeneralList = mutableListOf( 252012031, 252011010 )
+        maxImpactList = mutableListOf( 252031010, 252032031 )
+        maxSpecialList = mutableListOf( 252021010, 252022031 )
+        maxHPowerList = mutableListOf( 252041009, 252042013 )
+        weaponChangeList = mutableListOf( 252011011, 252021011, 252013009, 252031011, 252033009, 252041013 )
+        movementSpeedList = mutableListOf( 252012031, 252022031, 252032031, 252042013 )
+        movementSpeedWhileAimingList = mutableListOf( 252012011, 252021016, 252031016, 252033013, 252041018, 252043014 )
+        weakPointDmgAiming = mutableListOf( 252033013, 252043014 )
+
     }
 }
