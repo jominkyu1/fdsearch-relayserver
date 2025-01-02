@@ -44,11 +44,11 @@ fun Application.module() {
         })
     }
 
-    ExtractStatHelper.initModuleStatCalc()
+    //첫 시작시 메타데이터 조회 + 스탯 분리
+    FetchMetadataJobManually().executeManually()
 
     setupShceduler()
     configureMonitoring()
-
 
     routing {
         get("/basic_info") {

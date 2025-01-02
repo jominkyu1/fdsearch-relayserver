@@ -19,12 +19,12 @@ data class DescendantOriginalStatEntity (
 
 @Serializable
 data class DescendantOriginalSkillEntity(
-    val skill_type: String,
-    val skill_name: String,
-    val element_type: String,
+    val skill_type: String?,
+    val skill_name: String?,
+    val element_type: String?,
     val arche_type: String?,
-    val skill_image_url: String,
-    val skill_description: String,
+    val skill_image_url: String?,
+    val skill_description: String?,
 )
 
 @Serializable

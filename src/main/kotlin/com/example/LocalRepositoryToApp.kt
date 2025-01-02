@@ -2,6 +2,7 @@ package com.example
 
 import com.example.dto.*
 import javax.sql.DataSource
+import kotlin.math.log
 
 class LocalRepositoryToApp(private val dataSource: DataSource) {
 
@@ -274,9 +275,8 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         val innerTable = getTableName("ReactorSkillPowerEntity", lang)
         val leftTable = getTableName("ReactorEnchantEffectEntity", lang)
 
-        dataSource.connection.use { conn ->
-            conn.prepareStatement("""
-                SELECT
+        val sql = """
+            SELECT
                     R.reactor_id,
                     '1' as slotId,
                     R.reactor_name,
@@ -293,8 +293,10 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                 INNER JOIN $innerTable SP on R.reactor_id = SP.reactor_id 
                 LEFT JOIN $leftTable EE on R.reactor_id = EE.reactor_id and SP.level = EE.level and EE.enchant_level = ? 
                 WHERE R.reactor_id = ? and SP.level = ?
-            """.trimIndent()
-            ).use { stmt ->
+        """.trimIndent()
+
+        dataSource.connection.use { conn ->
+            conn.prepareStatement(sql).use { stmt ->
                 stmt.setInt(1, enchantLevel)
                 stmt.setString(2, reactorId)
                 stmt.setInt(3, level)

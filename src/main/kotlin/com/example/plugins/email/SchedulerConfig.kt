@@ -64,6 +64,7 @@ fun setupShceduler(){
             scheduleJob(job, trigger) // Send email
             scheduleJob(requestCountJob, hourlyTrigger) // endpoint count
             scheduleJob(fetchMetadataJob, weeklyTrigger) // fetch metadata
+            //scheduleJob(fetchMetadataJob, minuteTrigger) // fetch metadata 5mins (TEST)
             scheduleJob(clearCountTimeJob, dailyTrigger) // post user count
             logger.info("## Scheduler Service Started")
         }

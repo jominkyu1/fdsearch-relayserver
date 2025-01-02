@@ -156,7 +156,7 @@ object ExtractStatHelper {
 
     private fun startRoutine( vararg lists: List<MutableList<Int>> ) {
         CoroutineScope(Dispatchers.IO).launch {
-            logger.info("### Raw ModuleStat -> Calculated ModuleStat 작업 시작 [HEAVY] ###")
+            logger.info("### Raw ModuleStat -> Calculated ModuleStat 작업 시작 [HEAVY, Total Index: ${lists.size}] ###")
             val time = System.currentTimeMillis()
              lists.forEachIndexed { idx, varargs ->
                  varargs.forEach { list ->

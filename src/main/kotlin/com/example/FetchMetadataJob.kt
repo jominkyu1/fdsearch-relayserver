@@ -7,7 +7,39 @@ import org.quartz.JobExecutionContext
 
 
 class FetchMetadataJob : Job {
+    //메모리 초과 오류 발생.. 하나씩 진행
     override fun execute(context: JobExecutionContext?) {
+        CoroutineScope(Dispatchers.IO).launch {
+            logger.info("### 넥슨 메타데이터 조회 스케쥴 시작 ###")
+            fetchModuleOriginalData("ko")
+            fetchDescendantOriginalData("ko")
+            fetchTitleOriginalData("ko")
+            fetchWeaponOriginalData("ko")
+            fetchStatOriginalData("ko")
+            fetchReactorOriginalData("ko")
+            fetchExternalOriginalData("ko")
+
+            logger.info("### KOREAN METADATA DONE ###")
+
+            fetchModuleOriginalData("en")
+            fetchDescendantOriginalData("en")
+            fetchTitleOriginalData("en")
+            fetchWeaponOriginalData("en")
+            fetchStatOriginalData("en")
+            fetchReactorOriginalData("en")
+            fetchExternalOriginalData("en")
+
+            logger.info("### ENGLISH METADATA DONE ###")
+            logger.info("### 넥슨 메타데이터 조회 스케쥴 끝 ###")
+
+            logger.info("### 스탯 분리 스케쥴 시작 ###")
+            ExtractStatHelper.initModuleStatCalc()
+            logger.info("### 스탯 분리 스케쥴 끝 ###")
+        }
+    }
+
+    //Old ver
+    fun executeBkup() {
         CoroutineScope(Dispatchers.IO).launch {
             logger.info("### 넥슨 메타데이터 조회 스케쥴 시작 ###")
             val koTasks = listOf(
