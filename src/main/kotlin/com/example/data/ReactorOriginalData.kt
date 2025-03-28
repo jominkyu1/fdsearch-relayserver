@@ -16,8 +16,8 @@ data class ReactorOriginalData(
     val reactorName: String,
     @SerialName("reactor_skill_power")
     val reactorSkillPower: List<ReactorSkillPower>,
-    @SerialName("reactor_tier")
-    val reactorTier: String
+    @SerialName("reactor_tier_id")
+    val reactorTierId: String
 )
 
 @Serializable
@@ -38,8 +38,8 @@ data class ReactorSkillPower(
 data class EnchantEffect(
     @SerialName("enchant_level")
     val enchantLevel: Int,
-    @SerialName("stat_type")
-    val statType: String,
+    @SerialName("stat_id")
+    val statId: String,
     @SerialName("value")
     val value: Double
 )

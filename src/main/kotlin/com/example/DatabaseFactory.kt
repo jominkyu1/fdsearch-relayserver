@@ -26,6 +26,17 @@ object DatabaseFactory {
         dataSource.connection.use { conn ->
             conn.createStatement().use { stmt ->
                 // Create tables
+
+                //티어 기준정보
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS TierEntity_EN(
+                        tier_id TEXT,
+                        tier_name TEXT,
+                        
+                        PRIMARY KEY (tier_id)
+                    )
+                """.trimIndent())
+
                 // 칭호
                 stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS TitleEntity_EN (
@@ -50,10 +61,10 @@ object DatabaseFactory {
                     descendant_id TEXT,
                     level INTEGER,
                     
-                    stat_type TEXT,
+                    stat_id TEXT,
                     stat_value Double,
                     
-                    PRIMARY KEY (descendant_id, level, stat_type)
+                    PRIMARY KEY (descendant_id, level, stat_id)
                 )
                 """.trimIndent())
 
@@ -77,7 +88,7 @@ object DatabaseFactory {
                     module_Class TEXT,
                     module_Name TEXT,
                     module_SocketType TEXT,
-                    module_Tier TEXT,
+                    module_Tier_id TEXT,
                     module_Type TEXT,
                     
                     PRIMARY KEY (module_Id)
@@ -105,7 +116,7 @@ object DatabaseFactory {
                    weapon_PerkAbilityImageUrl TEXT,
                    weapon_PerkAbilityName TEXT,
                    weapon_RoundsType TEXT,
-                   weapon_Tier TEXT,
+                   weapon_Tier_id TEXT,
                    weapon_Type TEXT,
                    
                    PRIMARY KEY (weapon_Id)
@@ -151,7 +162,7 @@ object DatabaseFactory {
                     image_url TEXT,
                     optimized_condition_type TEXT,
                     reactor_name TEXT,
-                    reactor_tier TEXT,
+                    reactor_tier_id TEXT,
                 
                     PRIMARY KEY (reactor_id)
                  )    
@@ -175,7 +186,7 @@ object DatabaseFactory {
                     level INT,
                     enchant_level INT,
 
-                    stat_type TEXT,
+                    stat_id TEXT,
                     value REAL,
 
                     PRIMARY KEY (reactor_id, level, enchant_level)
@@ -202,7 +213,7 @@ object DatabaseFactory {
                     image_url TEXT,
 
                     external_component_equipment_type TEXT,
-                    external_component_tier TEXT,
+                    external_component_tier_id TEXT,
 
                     PRIMARY KEY (external_component_id)
                 )
@@ -241,6 +252,16 @@ object DatabaseFactory {
         dataSource.connection.use { conn ->
             conn.createStatement().use { stmt ->
                 // Create tables
+
+                //티어 기준정보
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS TierEntity(
+                        tier_id TEXT,
+                        tier_name TEXT,
+                        
+                        PRIMARY KEY (tier_id)
+                    )
+                """.trimIndent())
 
                 //분리된 모듈 스탯 테이블
                 stmt.executeUpdate("""
@@ -326,10 +347,10 @@ object DatabaseFactory {
                     descendant_id TEXT,
                     level INTEGER,
                     
-                    stat_type TEXT,
+                    stat_id TEXT,
                     stat_value Double,
                     
-                    PRIMARY KEY (descendant_id, level, stat_type)
+                    PRIMARY KEY (descendant_id, level, stat_id)
                 )
                 """.trimIndent())
 
@@ -353,7 +374,7 @@ object DatabaseFactory {
                     module_Class TEXT,
                     module_Name TEXT,
                     module_SocketType TEXT,
-                    module_Tier TEXT,
+                    module_Tier_id TEXT,
                     module_Type TEXT,
                     
                     PRIMARY KEY (module_Id)
@@ -381,7 +402,7 @@ object DatabaseFactory {
                    weapon_PerkAbilityImageUrl TEXT,
                    weapon_PerkAbilityName TEXT,
                    weapon_RoundsType TEXT,
-                   weapon_Tier TEXT,
+                   weapon_Tier_id TEXT,
                    weapon_Type TEXT,
                    
                    PRIMARY KEY (weapon_Id)
@@ -427,7 +448,7 @@ object DatabaseFactory {
                     image_url TEXT,
                     optimized_condition_type TEXT,
                     reactor_name TEXT,
-                    reactor_tier TEXT,
+                    reactor_tier_id TEXT,
                 
                     PRIMARY KEY (reactor_id)
                  )    
@@ -451,7 +472,7 @@ object DatabaseFactory {
                     level INT,
                     enchant_level INT,
 
-                    stat_type TEXT,
+                    stat_id TEXT,
                     value REAL,
 
                     PRIMARY KEY (reactor_id, level, enchant_level)
@@ -478,7 +499,7 @@ object DatabaseFactory {
                     image_url TEXT,
 
                     external_component_equipment_type TEXT,
-                    external_component_tier TEXT,
+                    external_component_tier_id TEXT,
 
                     PRIMARY KEY (external_component_id)
                 )

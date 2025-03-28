@@ -15,8 +15,8 @@ data class ExternalComponentOriginalData(
 
     @SerialName("external_component_equipment_type") // 착용부위
     val externalComponentEquipmentType: String,
-    @SerialName("external_component_tier")
-    val externalComponentTier: String,
+    @SerialName("external_component_tier_id")
+    val externalComponentTierId: String,
 
     @SerialName("base_stat")
     val baseStat: List<CompBaseStat>,
@@ -39,7 +39,7 @@ data class SetOptionDetail(
     @SerialName("set_count")
     val setCount: Int,
     @SerialName("set_option")
-    val setOption: String,
+    val setOption: String?,
     @SerialName("set_option_effect")
-    val setOptionEffect: String
+    val setOptionEffect: String?
 )

@@ -29,6 +29,6 @@ data class DescendantOriginalSkillEntity(
 
 @Serializable
 data class DescendantOriginalStatDetailEntity (
-    val stat_type: String,
+    val stat_id: String,
     val stat_value: Double,
 )

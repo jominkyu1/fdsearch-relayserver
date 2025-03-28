@@ -91,8 +91,9 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         val table = getTableName("DescendantStatDetail", lang)
         dataSource.connection.use { conn ->
             conn.prepareStatement("""
-                SELECT stat_type, stat_value
-                FROM $table
+                SELECT s.stat_name, stat_value
+                FROM $table as ds
+                    INNER JOIN StatEntity as s ON ds.stat_id = s.stat_id
                 WHERE descendant_id = ? and level = ?
             """.trimIndent()
             ).use { stmt ->
@@ -101,7 +102,7 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                 val rs = stmt.executeQuery()
                 while(rs.next()){
                     val stat = StatTypeValue(
-                        statType = rs.getString("stat_type"),
+                        statType = rs.getString("stat_name"),
                         statValue = rs.getString("stat_value")
                     )
                     statlist.add(stat)
@@ -159,6 +160,7 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         if(modules.isEmpty()) return emptyList()
         val table = getTableName("ModuleEntity", lang)
         val joinTable = getTableName("ModuleStatEntity", lang)
+        var joinTierTable = getTableName("TierEntity", lang)
 
         val whereConditions = modules.joinToString(" OR ") {
             "(MS.module_id = ${it.module_id} AND MS.level = ${it.module_enchant_level})"
@@ -167,9 +169,10 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         val query =
             """
             SELECT 
-            M.Module_Name, M.module_Class, M.module_SocketType, M.module_Type, M.module_Tier, 
+            M.Module_Name, M.module_Class, M.module_SocketType, M.module_Type, T.tier_name, 
             M.image_Url, MS.module_Id, MS.level, module_Capacity, value 
             FROM $table M 
+            INNER JOIN $joinTierTable T ON M.module_Tier_id = T.tier_id
             INNER JOIN $joinTable MS ON M.module_id = MS.module_Id 
             WHERE ${whereConditions}
             """.trimIndent()
@@ -184,7 +187,7 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                             moduleClass = rs.getString("module_Class"),
                             moduleSocketType = rs.getString("module_SocketType"),
                             moduleType = rs.getString("module_Type") ?: "",
-                            moduleTier = rs.getString("module_Tier"),
+                            moduleTier = rs.getString("tier_name"),
                             imageUrl = rs.getString("image_Url"),
                             moduleId = rs.getString("module_Id"),
                             level = rs.getInt("level"),
@@ -208,13 +211,14 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         val firearmTable = getTableName("WeaponFirearmEntity", lang)
         val statTable = getTableName("StatEntity", lang)
         val baseStatTable = getTableName("WeaponBaseStatEntity", lang)
+        val tierTable = getTableName("TierEntity", lang)
 
         dataSource.connection.use { conn ->
             conn.prepareStatement(
                 """
                     SELECT
                         we.weapon_id, image_Url, weapon_Name, weapon_PerkAbilityDescription, weapon_PerkAbilityImageUrl,
-                        weapon_PerkAbilityName, weapon_RoundsType, weapon_Tier, weapon_Type,
+                        weapon_PerkAbilityName, weapon_RoundsType, t.tier_name, weapon_Type,
                         
                         s1.stat_name AS stat_name,
                         wfe.firearmAtkValue as stat_value,
@@ -223,6 +227,7 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                         s3.stat_name AS stat_name3,
                         wbs3.stat_value AS stat_value3
                     FROM $table we
+                             INNER JOIN $tierTable t ON we.weapon_tier_id = t.tier_id
                              INNER JOIN $firearmTable wfe ON we.weapon_Id = wfe.weapon_Id
                              INNER JOIN $statTable s1 ON wfe.firearmAtkType = s1.stat_id
                              LEFT JOIN $baseStatTable wbs2 ON we.weapon_Id = wbs2.weapon_Id AND wbs2.stat_id = '105000021'
@@ -244,7 +249,7 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                             weaponPerkAbilityImageUrl = rs.getString("weapon_PerkAbilityImageUrl") ?: "",
                             weaponPerkAbilityName = rs.getString("weapon_PerkAbilityName") ?: "",
                             weaponRoundsType = rs.getString("weapon_RoundsType"),
-                            weaponTier = rs.getString("weapon_Tier"),
+                            weaponTier = rs.getString("tier_name"),
                             weaponType = rs.getString("weapon_Type"),
 
                             statValue = rs.getInt("stat_value"),
@@ -274,24 +279,29 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         val table = getTableName("ReactorEntity", lang)
         val innerTable = getTableName("ReactorSkillPowerEntity", lang)
         val leftTable = getTableName("ReactorEnchantEffectEntity", lang)
+        val tierTable = getTableName("TierEntity", lang)
+        val statTable = getTableName("StatEntity", lang)
 
         val sql = """
             SELECT
                     R.reactor_id,
                     '1' as slotId,
                     R.reactor_name,
-                    R.reactor_tier,
+                    T.tier_name,
                     SP.level,
                     EE.enchant_level,
-                    EE.stat_type,
+                    S.stat_name,
                     EE.value,
                     SP.skill_atk_power,
                     SP.sub_skill_atk_power,
                     R.optimized_condition_type,
                     R.image_url
                 FROM $table R 
+                INNER JOIN $tierTable T on R.reactor_tier_id = T.tier_id
                 INNER JOIN $innerTable SP on R.reactor_id = SP.reactor_id 
-                LEFT JOIN $leftTable EE on R.reactor_id = EE.reactor_id and SP.level = EE.level and EE.enchant_level = ? 
+                LEFT JOIN $leftTable EE on R.reactor_id = EE.reactor_id and SP.level = EE.level and EE.enchant_level = ?
+                INNER JOIN $statTable S ON EE.stat_id = S.stat_id
+                
                 WHERE R.reactor_id = ? and SP.level = ?
         """.trimIndent()
 
@@ -323,9 +333,10 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
             val table2 = getTableName("ReactorSkillPowerCoefficientEntity", lang)
             conn.prepareStatement("""
                 SELECT
-                    coefficient_stat_id,
+                    stat_name,
                     coefficient_stat_value
                 FROM $table2
+                    INNER JOIN $statTable ON coefficient_stat_id = stat_id
                 WHERE reactor_id = ? and level = ?
             """.trimIndent()
             ).use {stmt ->
@@ -357,6 +368,7 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
         }
 
         val table = getTableName("ExternalCompEntity", lang)
+        val tierTable = getTableName("TierEntity", lang)
         val innerBaseTable = getTableName("ExternalCompBaseStatEntity", lang)
         val innerStatTable = getTableName("StatEntity", lang)
 
@@ -371,12 +383,13 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                     ex.external_component_name,
                     ex.image_url,
                     ex.external_component_equipment_type,
-                    ex.external_component_tier,
+                    T.tier_name,
 
                     stat.stat_name,
                     exBase.stat_value
 
                 FROM $table ex
+                INNER JOIN $tierTable T ON ex.external_component_tier_id = T.tier_id
                 INNER JOIN $innerBaseTable exBase ON ex.external_component_id = exBase.external_component_id
                 INNER JOIN $innerStatTable stat ON exBase.stat_id = stat.stat_id
                 WHERE (ex.external_component_id, exBase.level) IN ($whereCondition)
@@ -424,11 +437,11 @@ class LocalRepositoryToApp(private val dataSource: DataSource) {
                     while (rs.next()) {
                         val enabledSet = EnabledSet(
                             enabledCount = rs.getInt(1),
-                            setOption = rs.getString(2),
+                            setOption = rs.getString(2) ?: "",
                             setOne = rs.getInt(3),
-                            setOneDesc = rs.getString(4),
+                            setOneDesc = rs.getString(4) ?: "",
                             setTwo = rs.getInt(5),
-                            setTwoDesc = rs.getString(6)
+                            setTwoDesc = rs.getString(6) ?: ""
                         )
                         //첫번째값에 설명추가
                         equipExternals[0].setOptions.add(enabledSet)

@@ -19,8 +19,8 @@ data class ModuleOriginalData(
     val moduleSocketType: String,
     @SerialName("module_stat")
     val moduleStat: List<ModuleStat>,
-    @SerialName("module_tier")
-    val moduleTier: String,
+    @SerialName("module_tier_id")
+    val moduleTierId: String?,
     @SerialName("module_type")
     val moduleType: String?,
 )

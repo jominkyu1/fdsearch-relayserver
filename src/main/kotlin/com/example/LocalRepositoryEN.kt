@@ -1,6 +1,7 @@
 package com.example
 
 import com.example.data.*
+import com.example.dto.Tier
 import com.example.plugins.email.EndpointEnum
 import java.time.LocalDate
 import javax.sql.DataSource
@@ -15,7 +16,7 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
             conn.autoCommit = false
 
             // ModuleEntity 테이블
-            // module_Id, image_Url, module_Class, module_Name, module_SocketType, module_Tier, module_Type
+            // module_Id, image_Url, module_Class, module_Name, module_SocketType, module_Tier_Id, module_Type
             conn.prepareStatement(
                 """
                     INSERT OR REPLACE INTO ModuleEntity_EN VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -27,7 +28,7 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
                     stmt.setString(3, module.moduleClass)
                     stmt.setString(4, module.moduleName)
                     stmt.setString(5, module.moduleSocketType)
-                    stmt.setString(6, module.moduleTier)
+                    stmt.setString(6, module.moduleTierId)
                     stmt.setString(7, module.moduleType)
                     stmt.addBatch()
                 }
@@ -106,7 +107,7 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
             }
 
             //DescendantStatDetail 테이블
-            //descendant_id, level, stat_type, stat_value
+            //descendant_id, level, stat_id, stat_value
             conn.prepareStatement(
                 """
                     INSERT OR REPLACE INTO DescendantStatDetail_EN VALUES (?, ?, ?, ?)
@@ -117,7 +118,7 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
                         stat.stat_detail.map { statDetail ->
                             stmt.setString(1, entity.descendant_id)
                             stmt.setInt(2, stat.level)
-                            stmt.setString(3, statDetail.stat_type)
+                            stmt.setString(3, statDetail.stat_id)
                             stmt.setDouble(4, statDetail.stat_value)
                             stmt.addBatch()
                         }
@@ -181,7 +182,7 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
             // WeaponEntity 테이블
             // weapon_Id, image_Url, weapon_Name, weapon_PerkAbilityDescription,
             // weapon_PerkAbilityImageUrl, weapon_PerkAbilityName, weapon_RoundsType,
-            // weapon_Tier, weapon_Type
+            // weapon_Tier_id, weapon_Type
             conn.prepareStatement(
                 """
                     INSERT OR REPLACE INTO WeaponEntity_EN VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -195,7 +196,7 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
                     stmt.setString(5, weapon.weapon_perk_ability_image_url)
                     stmt.setString(6, weapon.weapon_perk_ability_name)
                     stmt.setString(7, weapon.weapon_rounds_type)
-                    stmt.setString(8, weapon.weapon_tier)
+                    stmt.setString(8, weapon.weapon_tier_id)
                     stmt.setString(9, weapon.weapon_type)
                     stmt.addBatch()
                 }
@@ -274,7 +275,7 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
                     stmt.setString(2, reactor.imageUrl)
                     stmt.setString(3, reactor.optimizedConditionType)
                     stmt.setString(4, reactor.reactorName)
-                    stmt.setString(5, reactor.reactorTier)
+                    stmt.setString(5, reactor.reactorTierId)
                     stmt.addBatch()
                 }
                 stmt.executeBatch()
@@ -315,7 +316,7 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
                             stmt.setString(1, reactor.reactorId)
                             stmt.setInt(2, reactorSp.level)
                             stmt.setInt(3, reactorEffect.enchantLevel)
-                            stmt.setString(4, reactorEffect.statType)
+                            stmt.setString(4, reactorEffect.statId)
                             stmt.setDouble(5, reactorEffect.value)
                             stmt.addBatch()
                         }
@@ -362,7 +363,7 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
                     stmt.setString(2,ex.externalComponentName)
                     stmt.setString(3,ex.imageUrl)
                     stmt.setString(4,ex.externalComponentEquipmentType)
-                    stmt.setString(5,ex.externalComponentTier)
+                    stmt.setString(5,ex.externalComponentTierId)
                     stmt.addBatch()
                 }
                 stmt.executeBatch()
@@ -404,6 +405,25 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
                 stmt.executeBatch()
                 conn.commit()
 //                insertLog("ExternalComp SetOption Entity")
+            }
+        }
+    }
+
+    fun insertTierMetaDataEN(list: List<Tier>) {
+        dataSource.connection.use {conn ->
+            conn.autoCommit = false
+
+            conn.prepareStatement("""
+                INSERT OR REPLACE INTO TierEntity_EN (tier_id, tier_name) VALUES (?, ?)
+            """.trimIndent()
+            ).use { stmt ->
+                list.forEach { tier ->
+                    stmt.setString(1, tier.tierId)
+                    stmt.setString(2, tier.tierName)
+                    stmt.addBatch()
+                }
+                stmt.executeBatch()
+                conn.commit()
             }
         }
     }

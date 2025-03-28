@@ -46,7 +46,6 @@ fun Application.module() {
 
     //첫 시작시 메타데이터 조회 + 스탯 분리
     FetchMetadataJobManually().executeManually()
-
     setupShceduler()
     configureMonitoring()
 

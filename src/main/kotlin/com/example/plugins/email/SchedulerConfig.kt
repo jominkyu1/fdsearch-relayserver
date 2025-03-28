@@ -33,6 +33,7 @@ fun setupShceduler(){
     val trigger: Trigger = TriggerBuilder.newTrigger()
         .withIdentity("logEmailTrigger")
         .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(0, 5))
+        //.withSchedule(SimpleScheduleBuilder.repeatMinutelyForever(5)) //디버깅용 5분마다
         .build()
     //매일 00:00
     val dailyTrigger: Trigger = TriggerBuilder.newTrigger()

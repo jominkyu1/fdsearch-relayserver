@@ -13,7 +13,7 @@ data class WeaponOriginalData(
     val weapon_perk_ability_image_url: String?,
     val weapon_perk_ability_name: String?,
     val weapon_rounds_type: String?,
-    val weapon_tier: String,
+    val weapon_tier_id: String,
     val weapon_type: String?
 )
 

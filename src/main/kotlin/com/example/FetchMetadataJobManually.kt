@@ -11,6 +11,7 @@ class FetchMetadataJobManually {
     fun executeManually() {
         CoroutineScope(Dispatchers.IO).launch {
             logger.info("### 넥슨 메타데이터 조회 스케쥴 시작 ###")
+            fetchTierOriginalData("ko")
             fetchModuleOriginalData("ko")
             fetchDescendantOriginalData("ko")
             fetchTitleOriginalData("ko")
@@ -21,6 +22,7 @@ class FetchMetadataJobManually {
 
             logger.info("### KOREAN METADATA DONE ###")
 
+            fetchTierOriginalData("en")
             fetchModuleOriginalData("en")
             fetchDescendantOriginalData("en")
             fetchTitleOriginalData("en")

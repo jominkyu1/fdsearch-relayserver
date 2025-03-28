@@ -4,6 +4,7 @@ import com.example.DatabaseFactory
 import com.example.LocalRepository
 import com.example.LocalRepositoryEN
 import com.example.data.*
+import com.example.dto.Tier
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
@@ -119,5 +120,16 @@ suspend fun fetchExternalOriginalData(language_code: String){
     when(language_code){
         "ko" -> { localRepository.insertExternalCompMetaData(decodedList) }
         "en" -> { localEnRepository.insertExternalCompMetaData(decodedList) }
+    }
+}
+
+suspend fun fetchTierOriginalData(language_code: String){
+    val response = client.get("$BASE_URL/static/tfd/meta/$language_code/tier.json").bodyAsText()
+    val decodedList: List<Tier> = json.decodeFromString(response)
+    fetchLog("tier.json", decodedList.size, language_code)
+
+    when(language_code){
+        "ko" -> localRepository.insertTierMetaData(decodedList)
+        "en" -> localEnRepository.insertTierMetaDataEN(decodedList)
     }
 }
