@@ -54,10 +54,10 @@ fun Application.module() {
             val titlePrefixId = call.request.queryParameters["title_prefix_id"]
             val titleSuffixId = call.request.queryParameters["title_suffix_id"]
             val descendantId = call.request.queryParameters["descendant_id"]
-            val descendantLevel = call.request.queryParameters["descendant_level"]?.toInt()
+            val descendantLevel = call.request.queryParameters["descendant_level"]?.toInt() ?: 1
             val lang = call.request.queryParameters["lang"] ?: "ko"
 
-            if(titlePrefixId == null || titleSuffixId == null || descendantId == null || descendantLevel == null){
+            if(titlePrefixId == null || titleSuffixId == null || descendantId == null){
                 return@get call.respond(HttpStatusCode.Forbidden, "Parameter required")
             }
 

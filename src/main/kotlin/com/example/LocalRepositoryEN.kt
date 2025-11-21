@@ -3,6 +3,7 @@ package com.example
 import com.example.data.*
 import com.example.dto.Tier
 import com.example.plugins.email.EndpointEnum
+import java.sql.Types
 import java.time.LocalDate
 import javax.sql.DataSource
 
@@ -49,7 +50,13 @@ class LocalRepositoryEN(private val dataSource: DataSource) {
                     module.moduleStat.map { moduleStat ->
                         stmt.setString(1, module.moduleId)
                         stmt.setInt(2, moduleStat.level)
-                        stmt.setInt(3, moduleStat.moduleCapacity)
+                        val capacity = moduleStat.moduleCapacity
+                        if (capacity != null) {
+                            stmt.setInt(3, capacity)
+                        } else {
+                            // null일 경우, SQL의 INTEGER 타입으로 setNull을 호출합니다.
+                            stmt.setNull(3, Types.INTEGER)
+                        }
                         stmt.setString(4, moduleStat.value)
                         stmt.addBatch()
                     }
